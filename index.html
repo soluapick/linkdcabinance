@@ -223,6 +223,48 @@ input::-webkit-date-and-time-value{text-align:left;margin:0;min-height:50px}
 @keyframes sweep{55%,100%{transform:translateX(100%)}}
 @keyframes tang{0%,35%{color:#2EE59D;transform:scale(1.1)}}
 @keyframes giam{0%,35%{color:#FF6B6B;transform:scale(1.1)}}
+
+/* ---- Nhịp chữ và khoảng cách chung cho 4 tab ---- */
+.sub{margin:10px 0 20px}
+h2{margin:28px 0 12px;line-height:1.35}
+.seg:not(.three):not(.plan){margin-top:28px}
+.hero,.sum,.live,form,.box{border-radius:22px}
+.hero{padding:22px 20px}
+.sum{padding:18px 20px}
+.live,form,.box{padding:18px 16px}
+.card,.order{padding:16px}
+.grid,.list{gap:12px}
+.grid .card .value{font-size:24px;line-height:1.35;margin-top:2px}
+.sum b{font-size:25px;line-height:1.35}
+.field{margin-bottom:16px}
+label{line-height:1.4;margin-bottom:8px}
+input::placeholder{font-weight:400;color:#8A95AD}
+.preview{padding:8px 14px;margin-bottom:16px}
+.preview div{align-items:baseline;padding:5px 0;font-size:16px}
+.preview div+div{border-top:1px solid rgba(14,27,53,.08)}
+.preview b{font-size:17px}
+.pick{margin-bottom:10px}
+.pick .row{flex-wrap:wrap;column-gap:10px;row-gap:0}
+.pick .row>*{white-space:nowrap}
+.pick .row strong{font-size:20px}
+.order .row+.row{margin-top:2px}
+.order.sale .row.meta{padding-top:3px}
+.actions{margin-top:12px;gap:10px}
+.live .value{font-size:34px;margin:2px 0}
+.upct{display:block;width:fit-content;font-size:17px;font-weight:700;line-height:1.5;padding:1px 12px;margin:2px 0 6px;border-radius:99px;background:color-mix(in srgb,currentColor 12%,transparent)}
+.live .preview{margin-top:12px}
+.hero .chip+.label{font-size:15px}
+#reList:empty{display:none}
+#reList{margin-top:12px}
+.bn{margin-top:12px}
+@media (max-width:359px){
+  .panel{padding-left:14px;padding-right:14px}
+  .hero .value{font-size:36px}
+  .preview div{font-size:15px;gap:8px}
+  .preview b{font-size:16px}
+  .sum b,.grid .card .value{font-size:21px}
+  .seg.three button,.seg.plan button{font-size:14px}
+}
 </style>
 </head>
 <body>
@@ -900,7 +942,9 @@ function renderLive() {
   $('uCost').textContent = fmt(has ? t.cost : 0) + ' USDT';
   $('uPrice').textContent = price !== null ? fmtPrice(price) : '—';
   $('uWorth').textContent = ok ? fmt(t.qty * price) + ' USDT' : '—';
-  $('uValue').textContent = ok ? signed(pnl) + pct(pnl, t.cost) : '—';
+  $('uValue').textContent = ok ? signed(pnl) : '—';
+  const percent = ok ? pct(pnl, t.cost).replace(/[ ()]/g, '') : '';
+  if (percent) $('uValue').append(el('span', 'upct', percent));
   $('uValue').className = 'value ' + (ok ? tone(pnl) : '');
   $('uNote').textContent = !has ? 'Không còn LINK đang giữ.'
     : livePrice ? 'Giá Binance lúc ' + liveTime
