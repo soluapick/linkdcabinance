@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B4FD6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sổ Lệnh Coin">
+<title>Sổ Lệnh Coin</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#0B4FD6; --blue-deep:#062C80; --blue-soft:#E7EFFF;
+  --amber:#FFB020; --amber-soft:#FFF3DA; --amber-ink:#7A4E00;
+  --bg:#F3F6FC; --card:#fff; --ink:#0E1B35; --muted:#55627D; --line:#DFE6F3;
+  --nav-h:76px; --ease:cubic-bezier(.22,.9,.28,1);
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:17px;line-height:1.5;color:var(--ink);background:#DCE5F5}
+.app{position:fixed;inset:0;max-width:600px;margin:0 auto;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+@media (min-width:640px){.app{inset:20px 0;border-radius:28px;box-shadow:0 24px 60px rgba(6,44,128,.18)}}
+.viewport{flex:1;min-height:0;overflow:hidden;overflow:clip}
+.track{display:flex;height:100%;transition:transform .48s var(--ease);will-change:transform}
+.panel{flex:0 0 100%;min-width:0;height:100%;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:calc(env(safe-area-inset-top) + 24px) 20px 28px}
+
+h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.sub{color:var(--muted);margin:4px 0 20px}
+h2{font-size:20px;font-weight:700;margin:26px 0 12px}
+
+.hero{background:linear-gradient(140deg,var(--blue),var(--blue-deep));color:#fff;border-radius:22px;padding:22px}
+.hero .label{font-weight:500;opacity:.85}
+.hero .value{font-size:42px;font-weight:800;letter-spacing:-.02em;line-height:1.2;margin:4px 0 12px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.chip{display:inline-block;background:var(--amber);color:#2B1B00;font-weight:700;font-size:15px;border-radius:99px;padding:5px 14px}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+.card .label{color:var(--muted);font-size:15px;font-weight:500}
+.card .value{font-size:25px;font-weight:700;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.card.accent{background:var(--amber-soft);border-color:#FFE1A3}
+.card.accent .label{color:var(--amber-ink)}
+
+.empty{background:var(--card);border:2px dashed #C5D3EE;border-radius:20px;padding:32px 20px;text-align:center}
+.empty .icon{width:60px;height:60px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--blue-soft);color:var(--blue)}
+.empty.amber .icon{background:var(--amber-soft);color:#A86B00}
+.empty strong{display:block;font-size:19px}
+.empty p{color:var(--muted);margin-top:4px}
+.btn{margin-top:18px;font-family:inherit;font-size:17px;font-weight:700;line-height:1;border:0;border-radius:14px;padding:16px 24px;cursor:pointer;background:var(--blue);color:#fff;transition:transform .15s,filter .15s}
+.btn.amber{background:var(--amber);color:#2B1B00}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.96)}
+
+svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+nav{position:relative;display:grid;grid-template-columns:repeat(4,1fr);background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.indicator{position:absolute;top:0;left:0;width:25%;height:var(--nav-h);pointer-events:none;transition:transform .48s var(--ease)}
+.indicator::before{content:"";position:absolute;top:0;left:28%;right:28%;height:4px;border-radius:0 0 6px 6px;background:var(--amber)}
+.indicator::after{content:"";position:absolute;top:10px;left:50%;width:58px;height:34px;margin-left:-29px;border-radius:99px;background:var(--blue-soft)}
+.tab{position:relative;z-index:1;height:var(--nav-h);background:none;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);transition:color .25s}
+.tab svg{transition:transform .35s var(--ease)}
+.tab:active svg{transform:scale(.85)}
+.tab[aria-selected="true"]{color:var(--blue);font-weight:700}
+.tab[aria-selected="true"] svg{transform:translateY(-1px) scale(1.08)}
+button:focus-visible{outline:3px solid var(--amber);outline-offset:-3px;border-radius:12px}
+
+.panel.enter>*{animation:rise .5s var(--ease) backwards}
+.panel.enter>:nth-child(2){animation-delay:.04s}
+.panel.enter>:nth-child(3){animation-delay:.09s}
+.panel.enter>:nth-child(4){animation-delay:.14s}
+.panel.enter>:nth-child(5){animation-delay:.19s}
+.panel.enter>:nth-child(6){animation-delay:.24s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;background:linear-gradient(140deg,var(--blue),var(--blue-deep));color:#fff;border-radius:22px;padding:18px 20px;margin-bottom:14px}
+.sum div{min-width:0}
+.sum span{display:block;font-size:15px;opacity:.85}
+.sum b{font-size:26px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+form{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
+label{display:block;font-weight:600;margin-bottom:6px}
+.field{margin-bottom:14px}
+input{width:100%;min-width:0;height:54px;font-family:inherit;font-size:20px;font-weight:600;color:var(--ink);background:#F7F9FE;border:2px solid var(--line);border-radius:14px;padding:0 14px;transition:border-color .2s,box-shadow .2s}
+input:focus{outline:0;border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-soft)}
+input[type=datetime-local],#note{font-size:17px;font-weight:500}
+.preview{background:var(--amber-soft);border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.preview div{display:flex;justify-content:space-between;gap:12px}
+.preview span{color:var(--amber-ink)}
+.preview b{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.error{color:#B3261E;font-weight:600;margin-bottom:10px}
+.error:empty{display:none}
+form .btn{width:100%;margin-top:0}
+.btn.ghost{background:var(--blue-soft);color:var(--blue)}
+form .btn.ghost{margin-top:10px}
+.btn.danger{background:#B3261E}
+[hidden]{display:none!important}
+
+.list{display:grid;gap:10px}
+.order{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;transition:border-color .5s,box-shadow .5s}
+.order.fresh{animation:rise .45s var(--ease)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-variant-numeric:tabular-nums}
+.row strong{font-size:21px}
+.meta{color:var(--muted);font-size:15px;overflow-wrap:anywhere}
+.actions{display:flex;gap:8px;margin-top:10px}
+.actions button{flex:1;height:44px;border:0;border-radius:12px;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;background:var(--blue-soft);color:var(--blue)}
+.actions button.del{background:#FDECEA;color:#B3261E}
+
+dialog{margin:auto;width:min(360px,calc(100% - 40px));border:0;border-radius:22px;padding:22px;font-family:inherit;background:#fff;color:#0E1B35;box-shadow:0 20px 50px rgba(6,20,55,.35)}
+dialog[open]{animation:rise .3s var(--ease)}
+dialog::backdrop{background:rgba(6,20,55,.5)}
+dialog h3{font-size:23px;font-weight:800;color:#0E1B35;margin-bottom:12px}
+.dlg-info{background:#E7EFFF;border-radius:14px;padding:12px 14px;font-size:18px}
+.dlg-info div{display:flex;justify-content:space-between;gap:12px}
+.dlg-info span{color:#33415F}
+.dlg-info b{color:#0E1B35;text-align:right}
+.dlg-warn{margin-top:12px;color:#A11D16;font-weight:700}
+.dlg-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.dlg-actions .btn{margin:0}
+
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--blue-soft);border-radius:16px;padding:4px;margin:26px 0 12px}
+.seg::before{content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);background:var(--blue);border-radius:12px;transition:transform .35s var(--ease)}
+.seg.history::before{transform:translateX(100%)}
+.seg button{position:relative;height:48px;border:0;background:none;font-family:inherit;font-size:17px;font-weight:700;color:var(--blue);cursor:pointer;transition:color .25s}
+.seg button[aria-pressed="true"]{color:#fff}
+.badge{display:inline-block;margin-bottom:8px;font-size:14px;font-weight:700;border-radius:99px;padding:3px 12px;background:var(--blue-soft);color:var(--blue)}
+.order.sold{background:#FFFBF1;border-color:#FFD98A}
+.order.sold .badge{background:var(--amber);color:#2B1B00}
+
+.order.saved{border-color:var(--blue);box-shadow:0 0 0 4px var(--blue-soft)}
+.seg.three{grid-template-columns:repeat(3,1fr);margin:0 0 14px}
+.seg.three::before{width:calc((100% - 8px)/3);transform:translateX(calc(var(--i,0)*100%))}
+.seg.three button{font-size:15px;padding:0 4px}
+.ref{background:var(--amber-soft);border:2px solid #FFD98A;border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.ref span{display:block;color:var(--amber-ink);font-size:15px;font-weight:600}
+.ref b{font-size:28px;font-variant-numeric:tabular-nums}
+.pick{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px;cursor:pointer;font-weight:400;transition:.2s}
+.pick:has(input:checked){border-color:var(--blue);background:var(--blue-soft)}
+.pick input{width:24px;height:24px;flex:none;accent-color:var(--blue)}
+.pick>div{flex:1;min-width:0}
+.link{border:0;background:none;font-family:inherit;font-size:16px;font-weight:700;color:var(--blue);min-height:44px;cursor:pointer}
+.up{color:#0B7A43!important}
+.down{color:#B3261E!important}
+.order .actions+.meta,.hint{margin-top:8px}
+.order.sale .row.meta span:last-child{color:var(--ink);font-weight:600}
+.order.sale .row{flex-wrap:wrap}
+.order.sale strong{white-space:nowrap;font-size:20px}
+.avail{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:4px 12px;background:var(--blue-soft);border-radius:14px;padding:6px 14px;margin-bottom:10px}
+.avail b{font-size:21px;color:var(--blue);font-variant-numeric:tabular-nums}
+.dlg-warn:empty{display:none}
+.period{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.period button{flex:none;width:52px;height:52px;border:0;border-radius:14px;background:var(--blue-soft);color:var(--blue);font-size:28px;line-height:1;cursor:pointer}
+.period button:disabled{opacity:.35;cursor:default}
+.period input,.period b{flex:1;min-width:0;text-align:center;font-size:19px}
+.hero .value.gain{color:#7CF2B4}
+.hero .value.loss{color:#FFB4AB}
+.grid .value{font-size:22px}
+.live{background:var(--card);border:2px solid var(--amber);border-radius:22px;padding:18px}
+.live .label{font-weight:700}
+.live .value{font-size:36px;font-weight:800;line-height:1.25;color:var(--ink);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.live .preview{margin:10px 0 0}
+.live .field{margin:12px 0 0}
+.seg.plan{margin:0 0 8px}
+.seg.plan::before{transform:translateX(calc(var(--i,0)*100%))}
+.seg.plan button{font-size:15px}
+.with-btn{display:flex;gap:8px}
+.with-btn button{flex:none;border:0;border-radius:14px;padding:0 16px;background:var(--blue-soft);color:var(--blue);font-family:inherit;font-size:16px;font-weight:700;cursor:pointer}
+#reForm .preview:first-child{background:var(--blue-soft)}
+#reForm .preview:first-child span{color:#33415F}
+#reList{margin-top:10px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
+.box .btn{width:100%;margin-top:10px}
+.box h3{font-size:18px;margin:20px 0 0}
+#bkError{margin:10px 0 0}
+input[type=datetime-local],input[type=date]{display:block;-webkit-appearance:none;appearance:none;width:100%;max-width:100%;min-width:0;line-height:50px}
+input::-webkit-date-and-time-value{text-align:left;margin:0;min-height:50px}
+.period input{width:auto}
+.toast{position:absolute;left:20px;right:20px;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 14px);background:var(--ink);color:#fff;border-radius:14px;padding:14px 18px;text-align:center;font-weight:500;opacity:0;transform:translateY(12px);pointer-events:none;transition:.3s var(--ease);z-index:5}
+.toast.show{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* mỗi tab một màu: đổi bộ biến màu trong phạm vi tab đó */
+#p0,#t0{--blue:#0B4FD6;--blue-deep:#062C80;--blue-soft:#E4EDFF}
+#p1,#t1{--blue:#00796B;--blue-deep:#004A43;--blue-soft:#DCF3EF}
+#p2,#t2{--blue:#B84E00;--blue-deep:#7A2E00;--blue-soft:#FFEBDC}
+#p3,#t3{--blue:#6D2FD0;--blue-deep:#3B147E;--blue-soft:#EFE6FF}
+.panel{background:linear-gradient(var(--blue-soft),var(--bg) 260px) local,var(--bg)}
+.panel h1{color:var(--blue-deep)}
+.panel h1::after{content:"";display:block;width:48px;height:5px;margin-top:6px;border-radius:9px;background:var(--blue);transform-origin:left}
+.panel.active h1::after{animation:grow .7s .12s var(--ease) backwards}
+@keyframes grow{from{transform:scaleX(0);opacity:0}}
+.hero,.sum{position:relative;overflow:hidden}
+.hero::after,.sum::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.2) 50%,transparent 65%);transform:translateX(-100%);pointer-events:none}
+.panel.active .hero::after,.panel.active .sum::after{animation:shine 1.1s .3s ease-out}
+@keyframes shine{to{transform:translateX(100%)}}
+
+.indicator::before{display:none}
+.indicator::after{top:8px;width:62px;margin-left:-31px;background:var(--active,#0B4FD6);box-shadow:0 5px 14px color-mix(in srgb,var(--active,#0B4FD6) 40%,transparent);transition:background-color .48s,box-shadow .48s}
+.indicator.move::after{animation:stretch .48s var(--ease)}
+@keyframes stretch{40%{transform:scaleX(1.35) scaleY(.88)}}
+.tab{transition:color .3s}
+.tab svg{color:var(--blue);transition:transform .35s var(--ease),color .3s}
+.tab[aria-selected="true"]{color:var(--blue)}
+.tab[aria-selected="true"] svg{color:#fff;transform:none;animation:pop .5s var(--ease)}
+.tab:active svg{transform:scale(.85)}
+@keyframes pop{35%{transform:translateY(-5px) scale(1.2)}70%{transform:translateY(1px) scale(.96)}}
+
+/* vị trí icon và nền tính theo cùng mốc px, không phụ thuộc phông chữ của máy */
+.indicator::after{top:8px;height:38px;width:64px;margin-left:-32px}
+.tab{justify-content:flex-start;gap:0;padding:15px 0 0}
+.tab svg{display:block;flex:none;width:24px;height:24px;margin-bottom:12px}
+.tab{line-height:18px}
+
+.bn{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;margin-top:10px;padding:12px 16px;border-radius:16px;border:2px solid #FCD535;background:linear-gradient(120deg,#12161C,#2B3139);color:#fff;box-shadow:0 6px 18px rgba(252,213,53,.28);animation:glow 2.4s ease-in-out infinite}
+.bn span{display:flex;align-items:center;gap:9px;font-size:15px;font-weight:600}
+.bn b{margin-left:auto;font-size:27px;font-weight:800;color:#FCD535;font-variant-numeric:tabular-nums}
+.bn i{width:10px;height:10px;border-radius:50%;background:#2EE59D;animation:ping 1.6s ease-out infinite}
+.bn::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 40%,rgba(252,213,53,.22) 50%,transparent 60%);transform:translateX(-100%);animation:sweep 3.2s ease-in-out infinite;pointer-events:none}
+.bn.tang b{animation:tang 1.2s ease-out}
+.bn.giam b{animation:giam 1.2s ease-out}
+@keyframes glow{50%{box-shadow:0 6px 26px rgba(252,213,53,.55)}}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(46,229,157,.7)}100%{box-shadow:0 0 0 10px rgba(46,229,157,0)}}
+@keyframes sweep{55%,100%{transform:translateX(100%)}}
+@keyframes tang{0%,35%{color:#2EE59D;transform:scale(1.1)}}
+@keyframes giam{0%,35%{color:#FF6B6B;transform:scale(1.1)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <main class="viewport">
+    <div class="track" id="track">
+
+      <section class="panel" id="p0" role="tabpanel" aria-labelledby="t0">
+        <h1>Tổng quan</h1>
+        <p class="sub" id="today"></p>
+        <div class="hero">
+          <div class="label">Tổng vốn đang nắm giữ</div>
+          <div class="value" id="ovCost">0 USDT</div>
+          <span class="chip" id="ovCount">0 lệnh đang giữ</span>
+        </div>
+        <div class="grid">
+          <div class="card"><div class="label">LINK đang giữ</div><div class="value" id="ovQty">0</div></div>
+          <div class="card accent"><div class="label">Giá trung bình</div><div class="value" id="ovAvg">—</div></div>
+        </div>
+        <h2>Lệnh gần đây</h2>
+        <div class="empty" id="ovEmpty">
+          <div class="icon"><svg viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></div>
+          <strong>Chưa có lệnh nào</strong>
+          <p>Vào tab Mua coin để thêm lệnh đầu tiên.</p>
+        </div>
+        <div class="list" id="ovList"></div>
+        <div>
+          <h2>Sao lưu &amp; khôi phục</h2>
+          <div class="box">
+            <p class="meta" id="bkLast"></p>
+            <button class="btn" type="button" id="bkFileBtn">Tải file sao lưu</button>
+            <h3>Khôi phục</h3>
+            <button class="btn amber" type="button" id="rsFileBtn">Chọn file sao lưu</button>
+            <input type="file" id="rsFile" accept=".json,application/json" hidden>
+            <p class="error" id="bkError" role="alert"></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
+        <h1>Mua LINK</h1>
+        <p class="sub">Cặp LINK/USDT trên Binance</p>
+        <div class="sum">
+          <div><span>Giá trung bình</span><b id="buyAvg">—</b></div>
+          <div><span>LINK đang giữ</span><b id="buyQty">0</b></div>
+        </div>
+        <form id="form" novalidate autocomplete="off">
+          <div class="field"><label for="price">Giá mua (USDT)</label><input id="price" inputmode="decimal" placeholder="Ví dụ 9,7"></div>
+          <div class="field"><label for="usdt">Số tiền mua (USDT)</label><input id="usdt" inputmode="decimal" placeholder="Ví dụ 1000"></div>
+          <div class="field"><label for="time">Thời gian mua</label><input id="time" type="datetime-local"></div>
+          <div class="field"><label for="note">Ghi chú (không bắt buộc)</label><input id="note" maxlength="120"></div>
+          <div class="preview" aria-live="polite">
+            <div><span>LINK nhận</span><b id="pvQty">—</b></div>
+            <div><span id="pvLabel">Giá TB mới</span><b id="pvAvg">—</b></div>
+          </div>
+          <p class="error" id="error" role="alert"></p>
+          <button class="btn" id="submit" type="button">Lưu lệnh mua</button>
+          <button class="btn ghost" id="cancel" type="button" hidden>Huỷ sửa</button>
+        </form>
+        <div class="seg" id="seg" role="group" aria-label="Chọn danh sách lệnh">
+          <button type="button" id="segOpen" aria-pressed="true">Đang giữ</button>
+          <button type="button" id="segAll" aria-pressed="false">Lịch sử</button>
+        </div>
+        <p class="meta" id="buyEmpty"></p>
+        <div class="list" id="buyList"></div>
+      </section>
+
+      <section class="panel" id="p2" role="tabpanel" aria-labelledby="t2">
+        <h1>Bán LINK</h1>
+        <p class="sub">Cặp LINK/USDT trên Binance</p>
+        <div class="sum">
+          <div><span>Giá trung bình</span><b id="sellAvg">—</b></div>
+          <div><span>LINK đang giữ</span><b id="sellHold">0</b></div>
+        </div>
+        <form id="sellForm" novalidate autocomplete="off">
+          <div class="ref"><span>Giá tham khảo Binance</span><b id="refPrice">—</b><span id="refNote">Đang lấy giá…</span></div>
+          <div class="field"><label for="sellPrice">Giá bán của bạn (USDT)</label><input id="sellPrice" inputmode="decimal" placeholder="Nhập giá đã khớp"></div>
+          <div class="seg three" id="modes" role="group" aria-label="Cách bán">
+            <button type="button" data-mode="select" aria-pressed="true">Chọn lệnh</button>
+            <button type="button" data-mode="qty" aria-pressed="false">Số lượng</button>
+            <button type="button" data-mode="all" aria-pressed="false">Bán hết</button>
+          </div>
+          <div id="modeSelect"><div id="pickList"></div></div>
+          <div id="modeQty" class="field" hidden>
+            <label for="sellQty">Số LINK muốn bán</label>
+            <div class="avail"><span>Khả dụng: <b id="availQty">0</b> <strong>LINK</strong></span><button type="button" class="link" id="maxQty">Bán tối đa</button></div>
+            <input id="sellQty" inputmode="decimal" placeholder="Ví dụ 50">
+          </div>
+          <p class="meta field" id="modeAll" hidden></p>
+          <div class="preview" aria-live="polite">
+            <div><span>Số LINK bán</span><b id="sQty">—</b></div>
+            <div><span>Giá mua trung bình</span><b id="sAvg">—</b></div>
+            <div><span>Giá bán</span><b id="sPrice">—</b></div>
+            <div><span>Tiền thu về</span><b id="sRev">—</b></div>
+            <div><span>Lời / lỗ</span><b id="sPnl">—</b></div>
+            <div><span>Còn lại</span><b id="sRest">—</b></div>
+          </div>
+          <p class="error" id="sellError" role="alert"></p>
+          <button class="btn amber" id="sellBtn" type="button">Bán</button>
+        </form>
+        <h2 id="salesTitle">Lịch sử bán</h2>
+        <p class="meta" id="salesEmpty">Chưa có lần bán nào.</p>
+        <div class="list" id="salesList"></div>
+      </section>
+
+      <section class="panel" id="p3" role="tabpanel" aria-labelledby="t3">
+        <h1>Lời / Lỗ</h1>
+        <p class="sub">Đang giữ và đã bán</p>
+        <div class="live">
+          <div class="label">Lời / lỗ chưa chốt</div>
+          <div class="value" id="uValue">—</div>
+          <div class="meta" id="uNote">Đang lấy giá…</div>
+          <div class="preview">
+            <div><span>LINK còn lại</span><b id="uQty">0</b></div>
+            <div><span>Giá mua trung bình</span><b id="uAvg">—</b></div>
+            <div><span>Giá mua trên Binance</span><b id="uPrice">—</b></div>
+            <div><span>Vốn còn lại</span><b id="uCost">0 USDT</b></div>
+            <div><span>Giá trị hiện tại</span><b id="uWorth">—</b></div>
+          </div>
+          <div class="field" id="uManualBox" hidden><label for="uManual">Nhập giá để tính thử (không lưu)</label><input id="uManual" inputmode="decimal" placeholder="Ví dụ 9,7"></div>
+        </div>
+        <div>
+          <h2>Đã chốt</h2>
+          <div class="seg three" id="plModes" role="group" aria-label="Khoảng thời gian">
+            <button type="button" data-range="day" aria-pressed="false">Ngày</button>
+            <button type="button" data-range="month" aria-pressed="false">Tháng</button>
+            <button type="button" data-range="all" aria-pressed="true">Tất cả</button>
+          </div>
+          <div class="period" id="period" hidden>
+            <button type="button" id="prev" aria-label="Lùi">‹</button>
+            <input type="date" id="plDay" aria-label="Chọn ngày">
+            <b id="plMonth"></b>
+            <button type="button" id="next" aria-label="Tới">›</button>
+          </div>
+        </div>
+        <div class="hero">
+          <div class="label" id="plLabel">Tổng lời / lỗ đã chốt</div>
+          <div class="value" id="plValue">0 USDT</div>
+          <span class="chip" id="plPct">0%</span>
+          <div class="label" id="plNote" hidden></div>
+        </div>
+        <div class="grid">
+          <div class="card"><div class="label">Tổng lãi</div><div class="value up" id="plWin">0</div></div>
+          <div class="card"><div class="label">Tổng lỗ</div><div class="value down" id="plLoss">0</div></div>
+          <div class="card"><div class="label">Vốn đã bán</div><div class="value" id="plCost">0</div></div>
+          <div class="card accent"><div class="label">Tiền thu về</div><div class="value" id="plRev">0</div></div>
+        </div>
+        <div>
+          <h2>Trích lời mua thêm LINK</h2>
+          <form id="reForm" novalidate autocomplete="off">
+            <div class="preview">
+              <div><span>Lời từ các lần bán</span><b id="reTotal">0 USDT</b></div>
+              <div><span>Đã trích</span><b id="reUsed">0 USDT</b></div>
+              <div><span>Còn trích được</span><b id="reFree">0 USDT</b></div>
+            </div>
+            <div class="seg plan" id="plans" role="group" aria-label="Phương án">
+              <button type="button" aria-pressed="true">PA 1: Vốn 0</button>
+              <button type="button" aria-pressed="false">PA 2: Tính vốn</button>
+            </div>
+            <p class="meta field" id="planNote"></p>
+            <div class="field"><label for="reAmount">Số lời muốn trích (USDT)</label><div class="with-btn"><input id="reAmount" inputmode="decimal" placeholder="Ví dụ 50"><button type="button" id="reAll">Toàn bộ</button></div></div>
+            <div class="field"><label for="rePrice">Giá mua thêm (USDT)</label><input id="rePrice" inputmode="decimal" placeholder="Nhập giá đã khớp"><div class="bn" id="reRef" hidden><span><i aria-hidden="true"></i>Giá Binance tham khảo</span><b id="reRefPrice"></b></div></div>
+            <div class="preview" aria-live="polite">
+              <div><span>LINK mua thêm</span><b id="reQty">—</b></div>
+              <div><span>Vốn cộng thêm</span><b id="reCost">—</b></div>
+              <div><span>Giá TB hiện tại</span><b id="reOld">—</b></div>
+              <div><span>Giá TB mới</span><b id="reNew">—</b></div>
+              <div><span>LINK sau khi mua</span><b id="reHold">—</b></div>
+            </div>
+            <p class="error" id="reError" role="alert"></p>
+            <button class="btn" id="reBtn" type="button">Mua thêm LINK</button>
+          </form>
+          <div class="list" id="reList"></div>
+        </div>
+        <div>
+          <h2 id="plTitle">Chi tiết các lần bán</h2>
+          <p class="meta" id="plEmpty"></p>
+          <div class="list" id="plList"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <dialog id="confirm">
+    <h3 id="confirmTitle"></h3>
+    <div id="confirmText"></div>
+    <div class="dlg-actions">
+      <button class="btn ghost" type="button" id="no">Giữ lại</button>
+      <button class="btn danger" type="button" id="yes">Xoá lệnh</button>
+    </div>
+  </dialog>
+
+  <nav role="tablist" aria-label="Điều hướng chính">
+    <div class="indicator" id="indicator"></div>
+    <button class="tab" role="tab" id="t0" aria-controls="p0">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7M5 10v10h14V10"/></svg>Tổng quan
+    </button>
+    <button class="tab" role="tab" id="t1" aria-controls="p1">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Mua coin
+    </button>
+    <button class="tab" role="tab" id="t2" aria-controls="p2">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>Bán coin
+    </button>
+    <button class="tab" role="tab" id="t3" aria-controls="p3">
+      <svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V4M19 20v-6"/></svg>Lời/Lỗ
+    </button>
+  </nav>
+</div>
+
+<script>
+// Lớp lưu trữ local. lots = các lệnh đang giữ, sales = lịch sử bán
+const Store = {
+  key: 'linkdca.v1', // tên riêng vì mọi trang trên cùng tên miền github.io dùng chung bộ nhớ
+  temp: null, // bản lưu tạm khi trình duyệt chặn bộ nhớ
+  load() {
+    if (this.temp) return JSON.parse(this.temp);
+    const base = { lots: [], sales: [], lastTab: 0, lastUsdt: 1000 };
+    let raw = null;
+    try {
+      raw = localStorage.getItem(this.key);
+      const d = Object.assign(base, JSON.parse(raw));
+      if (!Array.isArray(d.lots) || !Array.isArray(d.sales)) throw new Error('data');
+      return d;
+    } catch (e) {
+      // dữ liệu hỏng: giữ lại một bản trước khi bị ghi đè
+      if (raw) try { localStorage.setItem(this.key + '.loi', raw); } catch (_) {}
+      return Object.assign(base, { lots: [] });
+    }
+  },
+  save(d) {
+    try { localStorage.setItem(this.key, JSON.stringify(d)); return true; }
+    catch (e) { this.temp = JSON.stringify(d); return true; }
+  }
+};
+let data = Store.load();
+
+const slugs = ['tong-quan', 'mua-coin', 'ban-coin', 'loi-lo'];
+const track = document.getElementById('track');
+const indicator = document.getElementById('indicator');
+const tabs = [...document.querySelectorAll('.tab')];
+const panels = [...document.querySelectorAll('.panel')];
+let current = -1;
+
+function go(i) {
+  i = Math.max(0, Math.min(3, i));
+  if (i === current) { panels[i].scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  current = i;
+  track.style.transform = `translateX(${-100 * i}%)`;
+  indicator.style.transform = `translateX(${100 * i}%)`;
+  // thanh đánh dấu và thanh trình duyệt đổi theo màu của tab
+  const color = getComputedStyle(panels[i]).getPropertyValue('--blue').trim();
+  indicator.style.setProperty('--active', color);
+  document.querySelector('meta[name="theme-color"]').content = color;
+  indicator.classList.remove('move');
+  void indicator.offsetWidth;
+  indicator.classList.add('move');
+  tabs.forEach((t, n) => { t.setAttribute('aria-selected', n === i); t.tabIndex = n === i ? 0 : -1; });
+  panels.forEach((p, n) => { p.classList.toggle('active', n === i); p.classList.toggle('enter', n === i); p.inert = n !== i; });
+  // hiệu ứng vào trang chỉ chạy khi đổi tab, không chạy lại khi dữ liệu thay đổi
+  clearTimeout(go.timer);
+  go.timer = setTimeout(() => panels[i].classList.remove('enter'), 900);
+data = Store.load(); data.lastTab = i; Store.save(data);
+  if (i >= 2) fetchPrice();
+  try { history.replaceState(null, '', '#' + slugs[i]); } catch (e) {}
+}
+
+tabs.forEach((t, i) => t.addEventListener('click', () => go(i)));
+document.querySelector('nav').addEventListener('keydown', e => {
+  const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+  if (step) { go(current + step); tabs[current].focus(); }
+});
+
+// Vuốt ngang để chuyển tab
+let start = null;
+track.addEventListener('touchstart', e => {
+  start = e.touches.length === 1 && !e.target.closest('input') ? e.touches[0] : null;
+}, { passive: true });
+track.addEventListener('touchend', e => {
+  if (!start) return;
+  const dx = e.changedTouches[0].clientX - start.clientX;
+  const dy = e.changedTouches[0].clientY - start.clientY;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) go(current + (dx < 0 ? 1 : -1));
+  start = null;
+}, { passive: true });
+
+let timer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(timer);
+  timer = setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+const $ = id => document.getElementById(id);
+const fmt = (n, max = 2) => n.toLocaleString('vi-VN', { maximumFractionDigits: max });
+const fmtPrice = n => n === null ? '—' : fmt(n, 4);
+
+// Chấp nhận cả "9,7" và "9.7". Riêng ô tiền: "1.000" hoặc "1,000" là một nghìn
+function parseNum(text, isMoney) {
+  let t = text.replace(/\s/g, '');
+  if (isMoney && /^[1-9]\d{0,2}(([.]\d{3})+|([,]\d{3})+)$/.test(t)) t = t.replace(/[.,]/g, '');
+  else {
+    const i = Math.max(t.lastIndexOf('.'), t.lastIndexOf(','));
+    if (i >= 0) t = t.slice(0, i).replace(/[.,]/g, '') + '.' + t.slice(i + 1);
+  }
+  return /^(\d+\.?\d*|\.\d+)$/.test(t) ? Number(t) : NaN;
+}
+
+// status: "sold" = đã bán, "merged" = đã gộp khi bán một phần
+const isSold = l => !!l.status;
+const openLots = lots => lots.filter(l => !isSold(l));
+const EPS = 0.00005; // sai số nhỏ hơn mức hiển thị 4 chữ số
+let showHistory = false;
+
+// Chạy lại lần lượt các lần bán, nên sửa/xoá lệnh mua thì lời lỗ tự tính lại
+function replay(d) {
+  const pool = new Map(d.lots.map(l => [l.id, { ...l, status: undefined }]));
+  const sales = [];
+  let error = null;
+  for (const s of d.sales) {
+    const used = s.lotIds.map(id => pool.get(id));
+    if (!used.length || used.some(l => !l || l.status)) { error = error || s; continue; }
+    const t = totals(used);
+    let qty = t.qty, cost = t.cost, rest = 0;
+    if (s.mode === 'qty') {
+      if (s.qty > t.qty + EPS) { error = error || s; continue; }
+      if (t.qty - s.qty > EPS) { qty = s.qty; cost = qty * t.avg; rest = t.qty - qty; }
+    }
+    used.forEach(l => l.status = rest ? 'merged' : 'sold');
+    // phần còn lại thành một lệnh gộp, giữ nguyên giá trung bình
+    if (rest) pool.set(s.id + '-g', { id: s.id + '-g', price: t.avg, qty: rest, cost: rest * t.avg, time: s.time, note: '', fromSale: true });
+    sales.push({ ...s, qty, cost, rest, avg: cost / qty, revenue: qty * s.price, pnl: qty * s.price - cost });
+  }
+  return { lots: [...pool.values()], sales, error };
+}
+
+function totals(lots) {
+  const qty = lots.reduce((s, l) => s + l.qty, 0);
+  const cost = lots.reduce((s, l) => s + l.cost, 0);
+  return { qty, cost, avg: qty > 0 ? cost / qty : null };
+}
+
+const localTime = (d = new Date()) => new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+const showTime = t => new Date(t).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+let editId = null, timeTouched = false;
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function card(lot, withActions) {
+  const c = el('article', isSold(lot) ? 'order sold' : 'order');
+  c.dataset.id = lot.id;
+  const badge = lot.status === 'sold' ? '✓ Đã bán' : lot.status === 'merged' ? 'Đã gộp khi bán' : lot.fromSale ? 'Lệnh gộp' : 'Đang giữ';
+  if (lot.fromProfit) c.append(el('span', 'badge', `Từ lời · PA ${lot.plan}` + (isSold(lot) ? ' · ' + badge : '')));
+  else if ((withActions && showHistory) || lot.fromSale) c.append(el('span', 'badge', badge));
+  const top = el('div', 'row'), mid = el('div', 'row meta');
+  top.append(el('strong', '', 'Giá ' + fmtPrice(lot.price)), el('strong', '', (lot.fromProfit ? 'Vốn ' : '') + fmt(lot.cost) + ' USDT'));
+  mid.append(el('span', '', fmt(lot.qty, 4) + ' LINK'), el('span', '', showTime(lot.time)));
+  c.append(top, mid);
+  if (lot.fromProfit) c.append(el('div', 'meta', `Trích lời ${fmt(lot.fromProfit)} USDT`));
+  if (lot.note) c.append(el('div', 'meta', lot.note));
+  if (withActions && lot.fromSale) {
+    c.append(el('div', 'meta hint', 'Phần còn lại sau khi bán. Muốn thay đổi, hãy huỷ lần bán ở tab Bán coin.'));
+  } else if (withActions) {
+    const a = el('div', 'actions');
+    const edit = el('button', '', 'Sửa'), del = el('button', 'del', 'Xoá');
+    edit.type = del.type = 'button';
+    edit.onclick = () => startEdit(lot.id);
+    del.onclick = () => askDelete(lot.id);
+    // lệnh từ lời chỉ xoá được (xoá thì số lời được trả lại)
+    if (lot.fromProfit) a.append(del); else a.append(edit, del);
+    c.append(a);
+  }
+  return c;
+}
+
+function render() {
+  const state = replay(data);
+  const t = totals(openLots(state.lots));
+  const all = [...state.lots].reverse().sort((a, b) => b.time.localeCompare(a.time));
+  const sorted = openLots(all);
+  const shown = showHistory ? all : sorted;
+  $('ovCost').textContent = fmt(t.cost) + ' USDT';
+  $('ovCount').textContent = sorted.length + ' lệnh đang giữ';
+  $('ovQty').textContent = $('buyQty').textContent = fmt(t.qty, 4);
+  $('ovAvg').textContent = $('buyAvg').textContent = fmtPrice(t.avg);
+  $('segOpen').textContent = 'Đang giữ (' + sorted.length + ')';
+  $('segAll').textContent = 'Lịch sử (' + all.length + ')';
+  $('ovEmpty').hidden = sorted.length > 0;
+  $('buyEmpty').hidden = shown.length > 0;
+  $('buyEmpty').textContent = showHistory ? 'Chưa có giao dịch nào.' : 'Không có lệnh đang giữ.';
+  $('ovList').replaceChildren(...sorted.slice(0, 5).map(l => card(l, false)));
+  $('buyList').replaceChildren(...shown.map(l => card(l, true)));
+  renderSell(state, sorted, t);
+  $('bkLast').textContent = data.lastBackup ? 'Sao lưu gần nhất: ' + showTime(data.lastBackup) : 'Bạn chưa sao lưu lần nào.';
+  preview();
+}
+
+function preview() {
+  const price = parseNum($('price').value), usdt = parseNum($('usdt').value, true);
+  const ok = price > 0 && usdt > 0;
+  const lots = replay(data).lots;
+  const others = openLots(lots).filter(l => l.id !== editId);
+  const editingSold = lots.some(l => l.id === editId && isSold(l));
+  $('pvQty').textContent = ok ? fmt(usdt / price, 4) + ' LINK' : '—';
+  $('pvAvg').textContent = ok && !editingSold ? fmtPrice(totals([...others, { qty: usdt / price, cost: usdt }]).avg) : '—';
+}
+
+function resetForm() {
+  editId = null; timeTouched = false;
+  $('price').value = $('note').value = $('error').textContent = '';
+  $('usdt').value = String(data.lastUsdt).replace('.', ',');
+  $('time').value = localTime();
+  $('submit').textContent = 'Lưu lệnh mua';
+  $('cancel').hidden = true;
+  preview();
+}
+
+function startEdit(id) {
+  const l = data.lots.find(x => x.id === id);
+  if (!l) return;
+  editId = id; timeTouched = true;
+  $('price').value = String(l.price).replace('.', ',');
+  $('usdt').value = String(l.cost).replace('.', ',');
+  $('time').value = l.time;
+  $('note').value = l.note;
+  $('error').textContent = '';
+  $('submit').textContent = 'Lưu thay đổi';
+  $('cancel').hidden = false;
+  preview();
+  $('p1').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Luôn đọc bản mới nhất rồi mới ghi; chỉ cập nhật màn hình khi ghi thành công
+function commit(change, isSale) {
+  const next = Store.load();
+  const before = freeProfit(next);
+  change(next);
+  const bad = replay(next).error;
+  if (bad) { toast(`Không được: lần bán ${showTime(bad.time)} sẽ bị sai. Hãy huỷ lần bán đó trước.`); return false; }
+  const after = freeProfit(next);
+  // bán lỗ vẫn được ghi; còn huỷ, sửa, xoá thì không được làm hụt phần lời đã trích
+  if (!isSale && usedProfit(next) > 0 && after < -0.005 && after < before - 0.005) { toast('Không được: số lời này đã trích mua LINK. Hãy xoá lệnh từ lời trước.'); return false; }
+  if (!Store.save(next)) { toast('Không lưu được. Kiểm tra bộ nhớ hoặc chế độ ẩn danh.'); return false; }
+  data = next; render(); return true;
+}
+
+let saving = false;
+// giữ bàn phím đến khi lưu xong để nút không chạy mất lúc đang bấm
+$('submit').addEventListener('pointerdown', e => e.preventDefault());
+// iPhone hay đẩy lệch cả trang khi đóng bàn phím: đưa về đúng chỗ
+document.addEventListener('focusout', () => setTimeout(() => {
+  if (!document.activeElement.matches('input')) window.scrollTo(0, 0);
+}, 60));
+$('form').addEventListener('submit', e => e.preventDefault());
+$('form').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); saveOrder(); }
+});
+$('submit').addEventListener('click', saveOrder);
+function saveOrder() {
+  if (saving && !$('price').value) return; // bấm đúp ngay sau khi lưu thì bỏ qua
+  const price = parseNum($('price').value), cost = parseNum($('usdt').value, true);
+  if (!(price > 0)) { $('error').textContent = 'Nhập giá mua lớn hơn 0.'; $('price').focus(); return; }
+  if (!(cost > 0)) { $('error').textContent = 'Nhập số tiền mua lớn hơn 0.'; $('usdt').focus(); return; }
+  // người dùng không chỉnh giờ thì lấy giờ lúc bấm lưu
+  const time = (timeTouched && $('time').value) || localTime();
+  const id = editId;
+  const lot = { id: id || Date.now().toString(36) + Math.random().toString(36).slice(2, 7), price, cost, qty: cost / price, time, note: $('note').value.trim() };
+  const panel = $('p1'), keep = panel.scrollTop;
+  const done = commit(d => {
+    const i = d.lots.findIndex(x => x.id === id);
+    if (i >= 0) d.lots[i] = { ...d.lots[i], ...lot }; else d.lots.push(lot);
+    if (!id) d.lastUsdt = cost;
+  });
+  if (!done) return;
+  document.activeElement.blur();
+  resetForm();
+  toast(id ? '✓ Đã lưu thay đổi' : '✓ Đã lưu lệnh mua');
+  if (Store.temp) toast('Chỉ lưu tạm: khung này không cho lưu vào máy');
+  showSaved(lot.id);
+  panel.scrollTop = keep;
+  saving = true;
+  $('submit').textContent = '✓ Đã lưu';
+  setTimeout(() => { saving = false; $('submit').textContent = editId ? 'Lưu thay đổi' : 'Lưu lệnh mua'; }, 1200);
+}
+$('price').addEventListener('input', () => { if (!editId && !timeTouched) $('time').value = localTime(); });
+['price', 'usdt'].forEach(i => $(i).addEventListener('input', () => { $('error').textContent = ''; preview(); }));
+$('time').addEventListener('input', () => timeTouched = true);
+$('cancel').addEventListener('click', resetForm);
+function setView(history) {
+  showHistory = history;
+  $('seg').classList.toggle('history', history);
+  $('segOpen').setAttribute('aria-pressed', !history);
+  $('segAll').setAttribute('aria-pressed', history);
+  render();
+}
+$('segOpen').onclick = () => setView(false);
+$('segAll').onclick = () => setView(true);
+
+// làm nổi bật lệnh vừa lưu, giữ nguyên vị trí trang
+function showSaved(id) {
+  if (isSold(replay(data).lots.find(l => l.id === id))) setView(true);
+  const c = $('buyList').querySelector(`[data-id="${id}"]`);
+  if (!c) return;
+  c.classList.add('saved', 'fresh');
+  setTimeout(() => c.classList.remove('saved', 'fresh'), 2600);
+}
+
+let onYes = null;
+function ask(title, rows, warn, yesText, yesClass, action) {
+  $('confirmTitle').textContent = title;
+  const info = el('div', 'dlg-info');
+  rows.forEach(([k, v]) => {
+    const r = el('div');
+    r.append(el('span', '', k), el('b', '', v));
+    info.append(r);
+  });
+  $('confirmText').replaceChildren(info, el('p', 'dlg-warn', warn));
+  $('yes').textContent = yesText;
+  $('yes').className = 'btn ' + yesClass;
+  $('no').textContent = 'Quay lại';
+  onYes = action;
+  $('confirm').showModal();
+}
+$('no').onclick = () => $('confirm').close();
+$('yes').onclick = () => {
+  const action = onYes;
+  onYes = null;
+  $('confirm').close();
+  if (action) action();
+};
+
+function askDelete(id) {
+  const lot = replay(data).lots.find(x => x.id === id);
+  if (!lot) return;
+  const warn = (isSold(lot) ? 'Lệnh này đã bán, lời/lỗ sẽ được tính lại. ' : '') + 'Xoá rồi không khôi phục được.';
+  ask('Xoá lệnh mua này?', [['Giá mua', fmtPrice(lot.price)], [lot.fromProfit ? 'Lời đã trích' : 'Số tiền', fmt(lot.fromProfit || lot.cost) + ' USDT'], ['Thời gian', showTime(lot.time)]], warn, 'Xoá lệnh', 'danger', () => {
+    const ok = commit(d => {
+      d.lots = d.lots.filter(x => x.id !== id);
+      d.sales.forEach(s => s.lotIds = s.lotIds.filter(x => x !== id));
+      d.sales = d.sales.filter(s => s.lotIds.length);
+    });
+    if (!ok) return;
+    if (editId === id) resetForm();
+    toast('Đã xoá lệnh');
+  });
+}
+
+// ---------- Bán ----------
+let sellMode = 'select';
+const picked = new Set();
+const signed = n => (n > 0.005 ? '+' : '') + fmt(Math.abs(n) < 0.005 ? 0 : n) + ' USDT';
+const pct = (pnl, cost) => cost > 0.005 ? ` (${pnl > 0.005 ? '+' : ''}${fmt(pnl / cost * 100)}%)` : '';
+const tone = n => n > 0.005 ? 'up' : n < -0.005 ? 'down' : '';
+// ô số lượng: "1.000" là một nghìn, dấu phẩy là phần lẻ
+const parseQty = t => parseNum(/^\s*[1-9]\d{0,2}(\.\d{3})+(,\d*)?\s*$/.test(t) ? t.replace(/\./g, '') : t);
+
+function renderSell(state, open, t) {
+  [...picked].forEach(id => { if (!open.some(l => l.id === id)) picked.delete(id); });
+  $('sellAvg').textContent = fmtPrice(t.avg);
+  $('sellHold').textContent = $('availQty').textContent = fmt(t.qty, 4);
+  $('modeAll').textContent = open.length ? `Bán toàn bộ ${open.length} lệnh đang giữ.` : 'Chưa có LINK để bán.';
+  $('pickList').replaceChildren(...(open.length ? open.map(l => {
+    const row = el('label', 'pick'), box = el('input'), body = el('div');
+    box.type = 'checkbox';
+    box.checked = picked.has(l.id);
+    box.onchange = () => { box.checked ? picked.add(l.id) : picked.delete(l.id); $('sellError').textContent = ''; sellPreview(); };
+    const top = el('div', 'row'), low = el('div', 'row meta');
+    top.append(el('strong', '', 'Giá ' + fmtPrice(l.price)), el('span', '', fmt(l.qty, 4) + ' LINK'));
+    low.append(el('span', '', (l.fromSale ? 'Lệnh gộp · ' : '') + showTime(l.time)));
+    body.append(top, low);
+    row.append(box, body);
+    return row;
+  }) : [el('p', 'meta field', 'Chưa có LINK để bán.')]));
+
+  const list = [...state.sales].reverse();
+  $('salesTitle').textContent = `Lịch sử bán (${list.length})`;
+  $('salesEmpty').hidden = list.length > 0;
+  $('salesList').replaceChildren(...list.map(x => saleCard(x, true)));
+  renderPL(list);
+  sellPreview();
+}
+
+const modeName = { select: 'Bán theo lệnh đã chọn', qty: 'Bán theo số lượng', all: 'Bán hết' };
+function saleCard(s, canCancel) {
+  const c = el('article', 'order sale');
+  const head = el('div', 'row');
+  head.append(el('strong', '', fmt(s.qty, 4) + ' LINK'), el('strong', tone(s.pnl), signed(s.pnl)));
+  c.append(head, el('div', 'meta', modeName[s.mode] + ' · ' + showTime(s.time)));
+  [['Giá mua TB', fmtPrice(s.avg)], ['Giá bán', fmtPrice(s.price)], ['Thu về', fmt(s.revenue) + ' USDT']].forEach(([k, v]) => {
+    const r = el('div', 'row meta');
+    r.append(el('span', '', k), el('span', '', v));
+    c.append(r);
+  });
+  const a = el('div', 'actions'), b = el('button', 'del', 'Huỷ lần bán');
+  b.type = 'button';
+  b.onclick = () => ask('Huỷ lần bán này?', [['Số lượng', fmt(s.qty, 4) + ' LINK'], ['Giá bán', fmtPrice(s.price)], ['Lời / lỗ', signed(s.pnl)]],
+    'Số LINK này sẽ trở lại danh sách đang giữ.', 'Huỷ lần bán', 'danger',
+    () => { if (commit(d => d.sales = d.sales.filter(x => x.id !== s.id))) toast('Đã huỷ lần bán'); });
+  if (canCancel) { a.append(b); c.append(a); }
+  return c;
+}
+
+// tính thử lần bán đang nhập trên dữ liệu d
+function plan(d) {
+  const open = openLots(replay(d).lots);
+  const used = sellMode === 'select' ? open.filter(l => picked.has(l.id)) : open;
+  const hold = totals(open), t = totals(used);
+  const price = parseNum($('sellPrice').value);
+  let qty = t.qty, mode = sellMode, error = '';
+  if (!open.length) error = 'Chưa có LINK để bán.';
+  else if (sellMode === 'select' && !used.length) error = 'Chọn ít nhất một lệnh để bán.';
+  else if (sellMode === 'qty') {
+    const q = parseQty($('sellQty').value);
+    if (!(q >= EPS)) { error = 'Nhập số LINK muốn bán.'; qty = 0; }
+    else if (q > t.qty + EPS) { error = `Bạn chỉ đang giữ ${fmt(t.qty, 4)} LINK.`; qty = 0; }
+    else if (t.qty - q > EPS) qty = q;
+    else mode = 'all';
+  }
+  if (!error && !(price > 0)) error = 'Nhập giá bán lớn hơn 0.';
+  return { error, mode, price, qty, avg: t.avg, rest: Math.max(0, hold.qty - qty), lotIds: used.map(l => l.id) };
+}
+
+function sellPreview() {
+  const p = plan(data), has = p.qty > 0 && p.avg !== null, priced = has && p.price > 0;
+  const cost = has ? p.qty * p.avg : 0, pnl = priced ? p.qty * p.price - cost : 0;
+  $('sQty').textContent = has ? fmt(p.qty, 4) + ' LINK' : '—';
+  $('sAvg').textContent = has ? fmtPrice(p.avg) : '—';
+  $('sPrice').textContent = p.price > 0 ? fmtPrice(p.price) : '—';
+  $('sRev').textContent = priced ? fmt(p.qty * p.price) + ' USDT' : '—';
+  $('sPnl').textContent = priced ? signed(pnl) + pct(pnl, cost) : '—';
+  $('sPnl').className = priced ? tone(pnl) : '';
+  $('sRest').textContent = has ? fmt(p.rest, 4) + ' LINK' : '—';
+}
+
+// ---------- Lời / Lỗ ----------
+let plRange = 'all';
+let plDate = localTime().slice(0, 10);
+const plKey = () => plRange === 'day' ? plDate : plRange === 'month' ? plDate.slice(0, 7) : '';
+
+// chưa chốt = LINK còn lại × giá Binance − vốn còn lại
+let livePrice = null, liveTime = '', priceFailed = false;
+// khung giá Binance: nháy xanh khi giá tăng, đỏ khi giá giảm
+let shownRef = null;
+function showRef() {
+  const box = $('reRef');
+  box.hidden = !livePrice;
+  if (!livePrice) return;
+  $('reRefPrice').textContent = fmtPrice(livePrice) + ' USDT';
+  if (shownRef !== null && livePrice !== shownRef) {
+    box.classList.remove('tang', 'giam');
+    void box.offsetWidth;
+    box.classList.add(livePrice > shownRef ? 'tang' : 'giam');
+  }
+  shownRef = livePrice;
+}
+
+function renderLive() {
+  const t = totals(openLots(replay(data).lots));
+  const manual = priceFailed ? parseNum($('uManual').value) : NaN;
+  const price = livePrice || (manual > 0 ? manual : null);
+  const has = t.qty >= EPS, ok = has && price !== null;
+  const pnl = ok ? t.qty * price - t.cost : 0;
+  $('uQty').textContent = fmt(t.qty, 4) + ' LINK';
+  $('uAvg').textContent = has ? fmtPrice(t.avg) : '—';
+  $('uCost').textContent = fmt(has ? t.cost : 0) + ' USDT';
+  $('uPrice').textContent = price !== null ? fmtPrice(price) : '—';
+  $('uWorth').textContent = ok ? fmt(t.qty * price) + ' USDT' : '—';
+  $('uValue').textContent = ok ? signed(pnl) + pct(pnl, t.cost) : '—';
+  $('uValue').className = 'value ' + (ok ? tone(pnl) : '');
+  $('uNote').textContent = !has ? 'Không còn LINK đang giữ.'
+    : livePrice ? 'Giá Binance lúc ' + liveTime
+    : priceFailed ? (ok ? 'Đang tính thử theo giá bạn nhập, không phải giá Binance.' : 'Chưa lấy được giá Binance.')
+    : 'Đang lấy giá…';
+  $('uManualBox').hidden = !priceFailed;
+  showRef();
+}
+
+// ---------- Trích lời ----------
+const usedProfit = d => d.lots.reduce((a, l) => a + (l.fromProfit || 0), 0);
+const freeProfit = d => replay(d).sales.reduce((a, x) => a + x.pnl, 0) - usedProfit(d);
+let plan2 = 1;
+
+function renderProfit(sales) {
+  const total = sales.reduce((a, x) => a + x.pnl, 0), used = usedProfit(data);
+  $('reTotal').textContent = signed(total);
+  $('reUsed').textContent = fmt(used) + ' USDT';
+  $('reFree').textContent = fmt(Math.max(0, total - used)) + ' USDT';
+  const lots = replay(data).lots.filter(l => l.fromProfit).reverse();
+  $('reList').replaceChildren(...lots.map(l => card(l, true)));
+  rePreview();
+}
+
+function reInput() {
+  const amount = parseNum($('reAmount').value, true), price = parseNum($('rePrice').value);
+  const free = freeProfit(data);
+  let error = '';
+  if (free < 0.01) error = 'Chưa có lời để trích.';
+  else if (!(amount > 0)) error = 'Nhập số lời muốn trích.';
+  else if (amount > free + 0.005) error = `Bạn chỉ còn trích được ${fmt(free)} USDT.`;
+  else if (!(price > 0)) error = 'Nhập giá mua thêm lớn hơn 0.';
+  return { amount, price, error, qty: amount / price, cost: plan2 === 1 ? 0 : amount };
+}
+
+function rePreview() {
+  const p = reInput(), open = openLots(replay(data).lots), old = totals(open);
+  const ok = p.amount > 0 && p.price > 0;
+  const next = ok ? totals([...open, p]) : null;
+  $('planNote').textContent = plan2 === 1 ? 'LINK mua thêm có giá vốn 0 USDT, giá trung bình giảm nhiều hơn.' : 'Số lời đem mua được tính là vốn gốc, như một lệnh mua bình thường.';
+  $('reQty').textContent = ok ? fmt(p.qty, 4) + ' LINK' : '—';
+  $('reCost').textContent = ok ? fmt(p.cost) + ' USDT' : '—';
+  $('reOld').textContent = fmtPrice(old.avg);
+  $('reNew').textContent = ok ? fmtPrice(next.avg) : '—';
+  $('reHold').textContent = ok ? fmt(next.qty, 4) + ' LINK' : '—';
+}
+
+function askReinvest() {
+  document.activeElement.blur();
+  const p = reInput();
+  $('reError').textContent = p.error;
+  if (p.error) return;
+  const lot = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), price: p.price, qty: p.qty, cost: p.cost, fromProfit: p.amount, plan: plan2, note: '' };
+  const next = totals([...openLots(replay(data).lots), lot]);
+  ask('Trích lời mua thêm?', [['Phương án', plan2 === 1 ? '1: Vốn 0' : '2: Tính vốn'], ['Lời trích', fmt(p.amount) + ' USDT'], ['Giá mua', fmtPrice(p.price)], ['LINK mua thêm', fmt(p.qty, 4)], ['Giá TB mới', fmtPrice(next.avg)]],
+    '', 'Mua thêm', '', () => {
+      if (!commit(d => d.lots.push({ ...lot, time: localTime() }))) return;
+      $('reAmount').value = $('rePrice').value = '';
+      rePreview();
+      toast('✓ Đã mua thêm LINK từ lời');
+    });
+}
+$('reBtn').addEventListener('click', askReinvest);
+$('reForm').addEventListener('submit', e => e.preventDefault());
+$('reForm').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); askReinvest(); }
+});
+['reAmount', 'rePrice'].forEach(i => $(i).addEventListener('input', () => { $('reError').textContent = ''; rePreview(); }));
+$('reAll').onclick = () => {
+  const free = Math.floor(Math.max(0, freeProfit(data)) * 100 + 1e-6) / 100;
+  $('reAmount').value = free ? String(free).replace('.', ',') : '';
+  $('reError').textContent = free ? '' : 'Chưa có lời để trích.';
+  rePreview();
+};
+[...$('plans').children].forEach((b, i, all) => b.onclick = () => {
+  plan2 = i + 1;
+  $('plans').style.setProperty('--i', i);
+  all.forEach(x => x.setAttribute('aria-pressed', x === b));
+  rePreview();
+});
+$('uManual').addEventListener('input', renderLive);
+
+function renderPL(sales) {
+  renderLive();
+  renderProfit(sales);
+  const list = sales.filter(x => x.time.startsWith(plKey()));
+  const sum = f => list.reduce((a, x) => a + f(x), 0);
+  const pnl = sum(x => x.pnl), cost = sum(x => x.cost);
+  const [y, m, d] = plDate.split('-');
+  const name = plRange === 'day' ? `ngày ${d}/${m}/${y}` : plRange === 'month' ? `tháng ${m}/${y}` : '';
+  $('plLabel').textContent = name ? 'Lời / lỗ ' + name : 'Tổng lời / lỗ đã chốt';
+  // mục "Tất cả" trừ phần lời đã trích; xem theo ngày, tháng thì giữ kết quả các lần bán
+  const used = plRange === 'all' ? usedProfit(data) : 0, net = pnl - used;
+  $('plValue').textContent = signed(net);
+  $('plValue').className = 'value ' + (net > 0.005 ? 'gain' : net < -0.005 ? 'loss' : '');
+  $('plPct').textContent = (net > 0.005 ? '+' : '') + fmt(cost > 0.005 && Math.abs(net) > 0.005 ? net / cost * 100 : 0) + '%';
+  $('plPct').hidden = cost <= 0.005 && Math.abs(net) > 0.005;
+  $('plNote').hidden = !(used > 0);
+  $('plNote').textContent = `Đã trừ ${fmt(used)} USDT lời đã trích`;
+  $('plNote').style.marginTop = '10px';
+  $('plWin').textContent = fmt(sum(x => Math.max(x.pnl, 0)));
+  $('plLoss').textContent = fmt(sum(x => Math.min(x.pnl, 0)));
+  $('plCost').textContent = fmt(cost);
+  $('plRev').textContent = fmt(sum(x => x.revenue));
+  $('plTitle').textContent = `Chi tiết các lần bán (${list.length})`;
+  $('plEmpty').hidden = list.length > 0;
+  $('plEmpty').textContent = name ? `Không có lần bán nào trong ${name}.` : 'Chưa có lần bán nào.';
+  $('plList').replaceChildren(...list.map(x => saleCard(x, false)));
+
+  $('period').hidden = plRange === 'all';
+  $('plDay').hidden = plRange !== 'day';
+  $('plMonth').hidden = plRange !== 'month';
+  $('plDay').value = plDate;
+  $('plDay').max = localTime().slice(0, 10);
+  $('plMonth').textContent = `Tháng ${m}/${y}`;
+  $('next').disabled = plKey() >= localTime().slice(0, plRange === 'day' ? 10 : 7);
+}
+const drawPL = () => renderPL([...replay(data).sales].reverse());
+
+function shiftPeriod(step) {
+  const [y, m, d] = plDate.split('-').map(Number);
+  const next = plRange === 'day' ? new Date(y, m - 1, d + step) : new Date(y, m - 1 + step, 1);
+  plDate = localTime(next).slice(0, 10);
+  drawPL();
+}
+$('prev').onclick = () => shiftPeriod(-1);
+$('next').onclick = () => shiftPeriod(1);
+$('plDay').addEventListener('change', () => { if ($('plDay').value) plDate = $('plDay').value; drawPL(); });
+[...$('plModes').children].forEach((b, i, all) => b.onclick = () => {
+  plRange = b.dataset.range;
+  plDate = localTime().slice(0, 10);
+  $('plModes').style.setProperty('--i', i);
+  all.forEach(x => x.setAttribute('aria-pressed', x === b));
+  drawPL();
+});
+$('plModes').style.setProperty('--i', 2);
+
+function setMode(mode) {
+  sellMode = mode;
+  const buttons = [...$('modes').children];
+  $('modes').style.setProperty('--i', buttons.findIndex(b => b.dataset.mode === mode));
+  buttons.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+  $('modeSelect').hidden = mode !== 'select';
+  $('modeQty').hidden = mode !== 'qty';
+  $('modeAll').hidden = mode !== 'all';
+  $('sellError').textContent = '';
+  sellPreview();
+}
+[...$('modes').children].forEach(b => b.onclick = () => setMode(b.dataset.mode));
+['sellPrice', 'sellQty'].forEach(i => $(i).addEventListener('input', () => { $('sellError').textContent = ''; sellPreview(); }));
+$('maxQty').onclick = () => {
+  const qty = totals(openLots(replay(data).lots)).qty;
+  $('sellQty').value = fmt(qty, 4);
+  sellPreview();
+};
+
+function askSell() {
+  document.activeElement.blur();
+  const p = plan(data);
+  $('sellError').textContent = p.error;
+  if (p.error) return;
+  const pnl = p.qty * (p.price - p.avg);
+  // giữ nguyên số liệu đã xác nhận để ghi đúng như hộp thoại
+  const sale = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), mode: p.mode, price: p.price, qty: p.qty, lotIds: p.lotIds };
+  ask('Xác nhận bán?', [['Số lượng', fmt(p.qty, 4) + ' LINK'], ['Giá bán', fmtPrice(p.price)], ['Lời / lỗ', signed(pnl)], ['Còn lại', fmt(p.rest, 4) + ' LINK']],
+    '', 'Lưu lệnh bán', 'amber', () => {
+      if (!commit(d => d.sales.push({ ...sale, time: localTime() }), true)) return;
+      picked.clear();
+      $('sellPrice').value = $('sellQty').value = '';
+      render();
+      toast('✓ Đã lưu lệnh bán');
+    });
+}
+$('sellBtn').addEventListener('click', askSell);
+$('sellForm').addEventListener('submit', e => e.preventDefault());
+$('sellForm').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); askSell(); }
+});
+
+// Giá tham khảo: giá mua cao nhất trên sổ lệnh Binance (giá bán được ngay)
+let fetching = false;
+async function fetchPrice() {
+  if (fetching) return;
+  fetching = true;
+  const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
+  try {
+    const r = await fetch('https://data-api.binance.vision/api/v3/ticker/bookTicker?symbol=LINKUSDT', { signal: abort.signal, cache: 'no-store' });
+    const price = Number((await r.json()).bidPrice);
+    if (!r.ok || !(price > 0)) throw new Error('price');
+    livePrice = price; priceFailed = false; liveTime = new Date().toLocaleTimeString('vi-VN');
+    $('refPrice').textContent = fmtPrice(price) + ' USDT';
+    $('refNote').textContent = 'Cập nhật lúc ' + liveTime;
+  } catch (e) {
+    livePrice = null; priceFailed = true;
+    $('refPrice').textContent = '—';
+    $('refNote').textContent = 'Chưa lấy được giá. Bạn vẫn nhập giá bán bên dưới được.';
+  } finally { clearTimeout(stop); fetching = false; renderLive(); }
+}
+setInterval(() => { if (current >= 2 && !document.hidden) fetchPrice(); }, 5000);
+
+// ---------- Sao lưu & khôi phục ----------
+function backupText() {
+  const d = Store.load();
+  return JSON.stringify({ app: 'linkdca', version: 1, time: localTime(), data: { lots: d.lots, sales: d.sales, lastUsdt: d.lastUsdt } });
+}
+const markBackup = () => commit(d => d.lastBackup = localTime(), true);
+
+// khung xem trước (iframe) không cho tải file, nên chỉ hiện nút tải khi mở trực tiếp
+$('bkFileBtn').hidden = window.self !== window.top;
+$('bkFileBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([backupText()], { type: 'application/json' }));
+  a.download = `linkdca-saoluu-${localTime().replace('T', '-').replace(':', '')}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+  markBackup();
+  toast('Đã tạo file. Kiểm tra mục Tải xuống.');
+};
+// chỉ nhận dữ liệu đúng cấu trúc, sai một chỗ là từ chối cả bản
+function readBackup(text) {
+  const b = JSON.parse(text.trim());
+  const num = n => typeof n === 'number' && Number.isFinite(n);
+  const id = x => typeof x === 'string' && /^[\w-]+$/.test(x);
+  const time = x => typeof x === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(x) && !isNaN(new Date(x));
+  const unique = list => new Set(list.map(x => x.id)).size === list.length;
+  if (!b || b.app !== 'linkdca' || b.version !== 1) throw new Error('app');
+  const { lots, sales, lastUsdt } = b.data;
+  const lotOk = l => id(l.id) && num(l.price) && l.price > 0 && num(l.qty) && l.qty > 0 && num(l.cost) && l.cost >= 0 && time(l.time) && typeof l.note === 'string'
+    && (l.fromProfit === undefined || (num(l.fromProfit) && l.fromProfit > 0 && (l.plan === 1 || l.plan === 2)));
+  const saleOk = x => id(x.id) && ['select', 'qty', 'all'].includes(x.mode) && num(x.price) && x.price > 0 && time(x.time)
+    && Array.isArray(x.lotIds) && x.lotIds.every(id) && new Set(x.lotIds).size === x.lotIds.length && (x.mode !== 'qty' || (num(x.qty) && x.qty > 0));
+  if (!Array.isArray(lots) || !Array.isArray(sales) || !lots.every(lotOk) || !sales.every(saleOk) || !unique(lots) || !unique(sales)) throw new Error('data');
+  if (replay({ lots, sales }).error) throw new Error('sales');
+  return { time: time(b.time) ? b.time : null, lots, sales, lastUsdt: num(lastUsdt) && lastUsdt > 0 ? lastUsdt : 1000 };
+}
+
+function askRestore(text) {
+  let b;
+  $('bkError').textContent = '';
+  try { b = readBackup(text); }
+  catch (e) { $('bkError').textContent = 'Không đọc được file này. Hãy chọn đúng file sao lưu .json.'; return; }
+  const now = Store.load();
+  ask('Khôi phục dữ liệu?', [['Ngày sao lưu', b.time ? showTime(b.time) : 'Không rõ'], ['Bản sao lưu', `${b.lots.length} lệnh mua, ${b.sales.length} lần bán`], ['Hiện tại', `${now.lots.length} lệnh mua, ${now.sales.length} lần bán`]],
+    'Toàn bộ dữ liệu hiện tại sẽ bị thay thế.', 'Khôi phục', 'danger', () => {
+      const next = { ...Store.load(), lots: b.lots, sales: b.sales, lastUsdt: b.lastUsdt };
+      if (!Store.save(next)) return;
+      data = next;
+      picked.clear();
+      $('sellPrice').value = $('sellQty').value = $('reAmount').value = $('rePrice').value = '';
+      resetForm();
+      render();
+      toast(Store.temp ? 'Đã khôi phục tạm: khung này không cho lưu vào máy' : '✓ Đã khôi phục dữ liệu');
+    });
+}
+$('rsFileBtn').onclick = () => $('rsFile').click();
+$('rsFile').onchange = async () => {
+  const file = $('rsFile').files[0];
+  $('rsFile').value = '';
+  if (!file) return;
+  try { askRestore(await file.text()); }
+  catch (e) { $('bkError').textContent = 'Không mở được file này.'; }
+};
+
+// mở app ở hai cửa sổ thì dữ liệu vẫn khớp
+window.addEventListener('storage', e => { if (e.key === Store.key) { data = Store.load(); render(); } });
+
+resetForm();
+render();
+
+$('today').textContent =
+  new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+
+window.addEventListener('hashchange', () => { const i = slugs.indexOf(location.hash.slice(1)); if (i >= 0) go(i); });
+const fromHash = slugs.indexOf(location.hash.slice(1));
+go(fromHash >= 0 ? fromHash : (Number(data.lastTab) || 0));
+</script>
+</body>
+</html>
