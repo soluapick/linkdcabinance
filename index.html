@@ -304,7 +304,8 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
 .head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .head>div:first-child{min-width:0}
 .ticker{flex:none;min-width:126px;padding:8px 12px 7px;border-radius:16px;border:1.5px solid #FCD535;background:#171B22;color:#fff;text-align:right;box-shadow:0 4px 12px rgba(18,22,28,.18);line-height:1.25}
-.ticker span{display:flex;align-items:center;justify-content:flex-end;gap:7px;font-size:13px;font-weight:700}
+.ticker>span{display:flex;align-items:center;justify-content:flex-end;gap:7px;font-size:13px;font-weight:700}
+.ticker em{font-style:normal}
 .ticker i{position:relative;width:8px;height:8px;border-radius:50%;background:#2EE59D}
 /* chỉ nháy ở tab đang xem, dùng transform cho nhẹ máy */
 .panel.active .ticker:not(.off) i::after{content:"";position:absolute;inset:0;border-radius:50%;background:#2EE59D;animation:wave 1.6s ease-out infinite}
@@ -323,6 +324,42 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
   .head h1{font-size:26px}
   .head .sub{font-size:14px}
 }
+/* ---- Hàng nút cặp và ngăn quản lý cặp ---- */
+x-coin{display:inline}
+.panel{padding-top:calc(env(safe-area-inset-top) + 12px)}
+.pairbar{display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.chips{display:flex;gap:8px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y pinch-zoom;scrollbar-width:none;position:relative;padding:3px 0}
+.chips::-webkit-scrollbar{display:none}
+.chips button,.addpair{flex:none;height:42px;border:1.5px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:99px;background:#fff;color:var(--blue);font-family:inherit;font-weight:700;cursor:pointer;transition:transform .15s,background-color .25s,color .25s}
+.chips button{min-width:68px;padding:0 18px;font-size:16px}
+.chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--blue) 30%,transparent)}
+.addpair{width:42px;font-size:24px;line-height:1;border-style:dashed}
+.chips button:active,.addpair:active{transform:scale(.92)}
+.panel.enter>.pairbar{animation:none}
+#drawer{margin:0 auto 0 max(0px,calc(50vw - 300px));width:min(330px,86%);max-width:86%;height:100%;height:100dvh;max-height:100%;border-radius:0 26px 26px 0;padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px);overflow-y:auto;overscroll-behavior:contain}
+#drawer::before{display:none}
+#drawer[open]{animation:drawerIn .34s cubic-bezier(.2,.85,.25,1)}
+#drawer.closing{animation:drawerOut .2s ease-in forwards}
+@keyframes drawerIn{from{transform:translateX(-100%)}}
+@keyframes drawerOut{to{transform:translateX(-100%)}}
+.dhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.dhead h3{margin:0}
+#drawerClose{width:44px;height:44px;border:0;border-radius:14px;background:var(--blue-soft);color:var(--blue);font-size:18px;cursor:pointer}
+.pair{display:flex;gap:8px;margin-bottom:8px}
+.pair button{font-family:inherit;border:2px solid #E1E6F0;border-radius:14px;background:#fff;color:#0E1B35;cursor:pointer}
+.pair .pick-pair{flex:1;min-width:0;display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;padding:9px 14px;min-height:60px}
+.pair .pick-pair strong{display:block;font-size:19px;overflow-wrap:anywhere}
+.pair .pick-pair small{display:block;font-size:13px;color:#56627A}
+.pair .pick-pair[aria-current="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.pair .pick-pair[aria-current="true"]::after{content:"✓";font-size:20px;font-weight:800;color:var(--blue)}
+.pair .del-pair{flex:none;width:58px;border-color:transparent;background:#FDECEA;color:#B3261E;font-size:15px;font-weight:700}
+.stepset{margin-top:18px}
+#pairForm{border-top:1px solid #E1E6F0;padding-top:16px}
+#pairForm h4{font-size:19px;margin:0 0 10px}
+#pairForm input{flex:1;min-width:0;text-transform:uppercase}
+#pairForm input::placeholder{text-transform:none}
+#pairForm .with-btn{align-items:center}
+#pairForm .btn{width:100%;margin-top:8px}
 </style>
 </head>
 <body>
@@ -331,10 +368,11 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
     <div class="track" id="track">
 
       <section class="panel" id="p0" role="tabpanel" aria-labelledby="t0">
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Tổng quan</h1>
           <p class="sub" id="today"></p></div>
-          <div class="ticker off" role="group" aria-label="Giá LINK/USDT trên Binance"><span><i aria-hidden="true"></i>LINK/USDT</span><b>—</b><small>Đang lấy giá…</small></div>
+          <div class="ticker off" role="group" aria-label="Giá trên Binance"><span><i aria-hidden="true"></i><em class="pairname"></em></span><b>—</b><small>Đang lấy giá…</small></div>
         </header>
         <div class="hero">
           <div class="label">Tổng vốn đang nắm giữ</div>
@@ -342,7 +380,7 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
           <span class="chip" id="ovCount">0 lệnh đang giữ</span>
         </div>
         <div class="grid">
-          <div class="card"><div class="label">LINK đang giữ</div><div class="value" id="ovQty">0</div></div>
+          <div class="card"><div class="label"><x-coin>LINK</x-coin> đang giữ</div><div class="value" id="ovQty">0</div></div>
           <div class="card accent"><div class="label">Giá trung bình</div><div class="value" id="ovAvg">—</div></div>
         </div>
         <h2>Lệnh gần đây</h2>
@@ -356,6 +394,7 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
           <h2>Sao lưu &amp; khôi phục</h2>
           <div class="box">
             <p class="meta" id="bkLast"></p>
+            <p class="meta">File gồm dữ liệu của tất cả các cặp.</p>
             <button class="btn" type="button" id="bkFileBtn">Tải file sao lưu</button>
             <h3>Khôi phục</h3>
             <button class="btn amber" type="button" id="rsFileBtn">Chọn file sao lưu</button>
@@ -366,14 +405,15 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
       </section>
 
       <section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
-          <div><h1>Mua LINK</h1>
+          <div><h1>Mua <x-coin>LINK</x-coin></h1>
           <p class="sub">Ghi lệnh mua</p></div>
-          <div class="ticker off" role="group" aria-label="Giá LINK/USDT trên Binance"><span><i aria-hidden="true"></i>LINK/USDT</span><b>—</b><small>Đang lấy giá…</small></div>
+          <div class="ticker off" role="group" aria-label="Giá trên Binance"><span><i aria-hidden="true"></i><em class="pairname"></em></span><b>—</b><small>Đang lấy giá…</small></div>
         </header>
         <div class="sum">
           <div><span>Giá trung bình</span><b id="buyAvg">—</b></div>
-          <div><span>LINK đang giữ</span><b id="buyQty">0</b></div>
+          <div><span><x-coin>LINK</x-coin> đang giữ</span><b id="buyQty">0</b></div>
         </div>
         <form id="form" novalidate autocomplete="off">
           <div class="field"><label for="price">Giá mua (USDT)</label><div class="stepper"><button type="button" id="priceDown" aria-label="Giảm giá 0,3">−</button><input id="price" inputmode="decimal" placeholder="Ví dụ 9,7"><button type="button" id="priceUp" aria-label="Tăng giá 0,3">+</button></div><div class="meta" id="priceHint">&nbsp;</div></div>
@@ -381,7 +421,7 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
           <div class="field"><label for="time">Thời gian mua</label><input id="time" type="datetime-local"></div>
           <div class="field"><label for="note">Ghi chú (không bắt buộc)</label><input id="note" maxlength="120"></div>
           <div class="preview" aria-live="polite">
-            <div><span>LINK nhận</span><b id="pvQty">—</b></div>
+            <div><span><x-coin>LINK</x-coin> nhận</span><b id="pvQty">—</b></div>
             <div><span id="pvLabel">Giá TB mới</span><b id="pvAvg">—</b></div>
           </div>
           <p class="error" id="error" role="alert"></p>
@@ -397,14 +437,15 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
       </section>
 
       <section class="panel" id="p2" role="tabpanel" aria-labelledby="t2">
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
-          <div><h1>Bán LINK</h1>
+          <div><h1>Bán <x-coin>LINK</x-coin></h1>
           <p class="sub">Ghi lệnh bán</p></div>
-          <div class="ticker off" role="group" aria-label="Giá LINK/USDT trên Binance"><span><i aria-hidden="true"></i>LINK/USDT</span><b>—</b><small>Đang lấy giá…</small></div>
+          <div class="ticker off" role="group" aria-label="Giá trên Binance"><span><i aria-hidden="true"></i><em class="pairname"></em></span><b>—</b><small>Đang lấy giá…</small></div>
         </header>
         <div class="sum">
           <div><span>Giá trung bình</span><b id="sellAvg">—</b></div>
-          <div><span>LINK đang giữ</span><b id="sellHold">0</b></div>
+          <div><span><x-coin>LINK</x-coin> đang giữ</span><b id="sellHold">0</b></div>
         </div>
         <form id="sellForm" novalidate autocomplete="off">
           <div class="ref"><span>Giá tham khảo Binance</span><b id="refPrice">—</b><span id="refNote">Đang lấy giá…</span></div>
@@ -416,13 +457,13 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
           </div>
           <div id="modeSelect"><div id="pickList"></div></div>
           <div id="modeQty" class="field" hidden>
-            <label for="sellQty">Số LINK muốn bán</label>
-            <div class="avail"><span>Khả dụng: <b id="availQty">0</b> <strong>LINK</strong></span><button type="button" class="link" id="maxQty">Bán tối đa</button></div>
+            <label for="sellQty">Số <x-coin>LINK</x-coin> muốn bán</label>
+            <div class="avail"><span>Khả dụng: <b id="availQty">0</b> <strong><x-coin>LINK</x-coin></strong></span><button type="button" class="link" id="maxQty">Bán tối đa</button></div>
             <input id="sellQty" inputmode="decimal" placeholder="Ví dụ 50">
           </div>
           <p class="meta field" id="modeAll" hidden></p>
           <div class="preview" aria-live="polite">
-            <div><span>Số LINK bán</span><b id="sQty">—</b></div>
+            <div><span>Số <x-coin>LINK</x-coin> bán</span><b id="sQty">—</b></div>
             <div><span>Giá mua trung bình</span><b id="sAvg">—</b></div>
             <div><span>Giá bán</span><b id="sPrice">—</b></div>
             <div><span>Tiền thu về</span><b id="sRev">—</b></div>
@@ -438,17 +479,18 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
       </section>
 
       <section class="panel" id="p3" role="tabpanel" aria-labelledby="t3">
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Lời / Lỗ</h1>
           <p class="sub">Đang giữ, đã bán</p></div>
-          <div class="ticker off" role="group" aria-label="Giá LINK/USDT trên Binance"><span><i aria-hidden="true"></i>LINK/USDT</span><b>—</b><small>Đang lấy giá…</small></div>
+          <div class="ticker off" role="group" aria-label="Giá trên Binance"><span><i aria-hidden="true"></i><em class="pairname"></em></span><b>—</b><small>Đang lấy giá…</small></div>
         </header>
         <div class="live">
           <div class="label">Lời / lỗ chưa chốt</div>
           <div class="value" id="uValue">—</div>
           <div class="meta" id="uNote">Đang lấy giá…</div>
           <div class="preview">
-            <div><span>LINK còn lại</span><b id="uQty">0</b></div>
+            <div><span><x-coin>LINK</x-coin> còn lại</span><b id="uQty">0</b></div>
             <div><span>Giá mua trung bình</span><b id="uAvg">—</b></div>
             <div><span>Giá mua trên Binance</span><b id="uPrice">—</b></div>
             <div><span>Vốn còn lại</span><b id="uCost">0 USDT</b></div>
@@ -483,7 +525,7 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
           <div class="card accent"><div class="label">Tiền thu về</div><div class="value" id="plRev">0</div></div>
         </div>
         <div>
-          <h2>Trích lời mua thêm LINK</h2>
+          <h2>Trích lời mua thêm <x-coin>LINK</x-coin></h2>
           <form id="reForm" novalidate autocomplete="off">
             <div class="preview">
               <div><span>Lời từ các lần bán</span><b id="reTotal">0 USDT</b></div>
@@ -498,14 +540,14 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
             <div class="field"><label for="reAmount">Số lời muốn trích (USDT)</label><div class="with-btn"><input id="reAmount" inputmode="decimal" placeholder="Ví dụ 50"><button type="button" id="reAll">Toàn bộ</button></div></div>
             <div class="field"><label for="rePrice">Giá mua thêm (USDT)</label><input id="rePrice" inputmode="decimal" placeholder="Nhập giá đã khớp"><div class="bn" id="reRef" hidden><span><i aria-hidden="true"></i>Giá Binance tham khảo</span><b id="reRefPrice"></b></div></div>
             <div class="preview" aria-live="polite">
-              <div><span>LINK mua thêm</span><b id="reQty">—</b></div>
+              <div><span><x-coin>LINK</x-coin> mua thêm</span><b id="reQty">—</b></div>
               <div><span>Vốn cộng thêm</span><b id="reCost">—</b></div>
               <div><span>Giá TB hiện tại</span><b id="reOld">—</b></div>
               <div><span>Giá TB mới</span><b id="reNew">—</b></div>
-              <div><span>LINK sau khi mua</span><b id="reHold">—</b></div>
+              <div><span><x-coin>LINK</x-coin> sau khi mua</span><b id="reHold">—</b></div>
             </div>
             <p class="error" id="reError" role="alert"></p>
-            <button class="btn" id="reBtn" type="button">Mua thêm LINK</button>
+            <button class="btn" id="reBtn" type="button">Mua thêm <x-coin>LINK</x-coin></button>
           </form>
           <div class="list" id="reList"></div>
         </div>
@@ -530,6 +572,18 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
     </div>
   </dialog>
 
+  <dialog id="drawer" aria-label="Cặp giao dịch">
+    <div class="dhead"><h3>Cặp giao dịch</h3><button type="button" id="drawerClose" aria-label="Đóng">✕</button></div>
+    <div id="pairList"></div>
+    <div class="field stepset"><label for="curStep">Bước giá nút − / + của <span id="stepPair"></span></label><input id="curStep" inputmode="decimal" placeholder="Ví dụ 0,3"></div>
+    <form id="pairForm" novalidate autocomplete="off">
+      <h4>Tạo cặp mới</h4>
+      <div class="with-btn"><input id="newPair" aria-label="Tên coin" placeholder="Ví dụ BTC" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20"><b>/USDT</b></div>
+      <p class="error" id="pairError" role="alert"></p>
+      <button class="btn" type="submit" id="pairAdd">Tạo cặp</button>
+    </form>
+  </dialog>
+
   <nav role="tablist" aria-label="Điều hướng chính">
     <div class="indicator" id="indicator"></div>
     <button class="tab" role="tab" id="t0" aria-controls="p0">
@@ -548,28 +602,59 @@ dialog.closing::backdrop{animation:fade .22s ease-in reverse forwards}
 </div>
 
 <script>
-// Lớp lưu trữ local. lots = các lệnh đang giữ, sales = lịch sử bán
+// Mỗi cặp giao dịch có kho dữ liệu riêng. LINK giữ nguyên tên cũ để không mất dữ liệu đã nhập
+const REG = 'linkdca.v1.pairs';
+const keyFor = c => c === 'LINK' ? 'linkdca.v1' : 'linkdca.v1.pair.' + c; // tên riêng vì mọi trang trên cùng tên miền github.io dùng chung bộ nhớ
+const temps = {}; // bản lưu tạm khi trình duyệt chặn bộ nhớ
+const coinOk = c => typeof c === 'string' && /^[A-Z0-9]{2,15}$/.test(c) && c !== 'USDT';
+const stepOk = n => typeof n === 'number' && Number.isFinite(n) && n > 0;
+
+function loadReg() {
+  let r = null;
+  try { r = JSON.parse(temps[REG] || localStorage.getItem(REG)); } catch (e) {}
+  const list = [];
+  (Array.isArray(r?.list) ? r.list : []).forEach(p => {
+    if (p && coinOk(p.coin) && !list.some(x => x.coin === p.coin)) list.push({ coin: p.coin, step: stepOk(p.step) ? p.step : null });
+  });
+  if (!list.some(p => p.coin === 'LINK')) list.unshift({ coin: 'LINK', step: 0.3 });
+  return { list, active: list.some(p => p.coin === r?.active) ? r.active : 'LINK', lastBackup: r?.lastBackup };
+}
+function saveReg() {
+  const text = JSON.stringify(reg);
+  try { localStorage.setItem(REG, text); delete temps[REG]; } catch (e) { temps[REG] = text; }
+}
+let reg = loadReg();
+let coin = reg.active;
+const pairStep = () => reg.list.find(p => p.coin === coin)?.step || null;
+
+// lots = các lệnh mua, sales = lịch sử bán
 const Store = {
-  key: 'linkdca.v1', // tên riêng vì mọi trang trên cùng tên miền github.io dùng chung bộ nhớ
-  temp: null, // bản lưu tạm khi trình duyệt chặn bộ nhớ
-  load() {
-    if (this.temp) return JSON.parse(this.temp);
+  get key() { return keyFor(coin); },
+  blocked: false,
+  load(c = coin) {
+    const key = keyFor(c);
+    if (temps[key]) return JSON.parse(temps[key]);
     const base = { lots: [], sales: [], lastTab: 0, lastUsdt: 1000 };
     let raw = null;
     try {
-      raw = localStorage.getItem(this.key);
+      raw = localStorage.getItem(key);
       const d = Object.assign(base, JSON.parse(raw));
       if (!Array.isArray(d.lots) || !Array.isArray(d.sales)) throw new Error('data');
       return d;
     } catch (e) {
       // dữ liệu hỏng: giữ lại một bản trước khi bị ghi đè
-      if (raw) try { localStorage.setItem(this.key + '.loi', raw); } catch (_) {}
+      if (raw) try { localStorage.setItem(key + '.loi', raw); } catch (_) {}
       return Object.assign(base, { lots: [] });
     }
   },
-  save(d) {
-    try { localStorage.setItem(this.key, JSON.stringify(d)); return true; }
-    catch (e) { this.temp = JSON.stringify(d); return true; }
+  save(d, c = coin) {
+    const key = keyFor(c);
+    try { localStorage.setItem(key, JSON.stringify(d)); delete temps[key]; return true; }
+    catch (e) { temps[key] = JSON.stringify(d); this.blocked = true; return true; }
+  },
+  remove(c) {
+    delete temps[keyFor(c)];
+    try { localStorage.removeItem(keyFor(c)); } catch (e) {}
   }
 };
 let data = Store.load();
@@ -625,7 +710,7 @@ function settle() {
 track.addEventListener('touchstart', e => {
   if (drag && drag.axis === 'x') settle();
   const p = e.touches[0];
-  drag = e.touches.length === 1 && !e.target.closest('input') ? { x: p.clientX, y: p.clientY, dx: 0, axis: null, at: e.timeStamp } : null;
+  drag = e.touches.length === 1 && !e.target.closest('input, .pairbar') ? { x: p.clientX, y: p.clientY, dx: 0, axis: null, at: e.timeStamp } : null;
 }, { passive: true });
 track.addEventListener('touchmove', e => {
   if (!drag || e.touches.length !== 1) return;
@@ -667,7 +752,12 @@ function toast(msg) {
 
 const $ = id => document.getElementById(id);
 const fmt = (n, max = 2) => n.toLocaleString('vi-VN', { maximumFractionDigits: max });
-const fmtPrice = n => n === null ? '—' : fmt(n, 4);
+// coin giá nhỏ cần nhiều chữ số có nghĩa hơn
+const fmtPrice = n => n === null ? '—' : coin === 'LINK' || n >= 1 || n === 0 ? fmt(n, 4) : n.toLocaleString('vi-VN', { maximumSignificantDigits: 6 });
+// LINK giữ 4 số lẻ; coin khác tuỳ độ lớn (BTC cần tới 8 số lẻ)
+const qtyDec = (n, c = coin) => c === 'LINK' ? 4 : Math.abs(n) >= 10000 ? 2 : Math.abs(n) >= 1 ? 6 : 8;
+const fmtQty = n => fmt(n, qtyDec(n));
+const qtyEps = (n, c = coin) => 0.5 * 10 ** -qtyDec(n, c); // sai số nhỏ hơn mức hiển thị
 
 const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -749,11 +839,10 @@ function parseNum(text, isMoney) {
 // status: "sold" = đã bán, "merged" = đã gộp khi bán một phần
 const isSold = l => !!l.status;
 const openLots = lots => lots.filter(l => !isSold(l));
-const EPS = 0.00005; // sai số nhỏ hơn mức hiển thị 4 chữ số
 let showHistory = false;
 
 // Chạy lại lần lượt các lần bán, nên sửa/xoá lệnh mua thì lời lỗ tự tính lại
-function replay(d) {
+function replay(d, c = coin) {
   const pool = new Map(d.lots.map(l => [l.id, { ...l, status: undefined }]));
   const sales = [];
   let error = null;
@@ -763,8 +852,9 @@ function replay(d) {
     const t = totals(used);
     let qty = t.qty, cost = t.cost, rest = 0;
     if (s.mode === 'qty') {
-      if (s.qty > t.qty + EPS) { error = error || s; continue; }
-      if (t.qty - s.qty > EPS) { qty = s.qty; cost = qty * t.avg; rest = t.qty - qty; }
+      const eps = qtyEps(t.qty, c);
+      if (s.qty > t.qty + eps) { error = error || s; continue; }
+      if (t.qty - s.qty > eps) { qty = s.qty; cost = qty * t.avg; rest = t.qty - qty; }
     }
     used.forEach(l => l.status = rest ? 'merged' : 'sold');
     // phần còn lại thành một lệnh gộp, giữ nguyên giá trung bình
@@ -800,7 +890,7 @@ function card(lot, withActions) {
   else if ((withActions && showHistory) || lot.fromSale) c.append(el('span', 'badge', badge));
   const top = el('div', 'row'), mid = el('div', 'row meta');
   top.append(el('strong', '', 'Giá ' + fmtPrice(lot.price)), el('strong', '', (lot.fromProfit ? 'Vốn ' : '') + fmt(lot.cost) + ' USDT'));
-  mid.append(el('span', '', fmt(lot.qty, 4) + ' LINK'), el('span', '', showTime(lot.time)));
+  mid.append(el('span', '', fmtQty(lot.qty) + ' ' + coin), el('span', '', showTime(lot.time)));
   c.append(top, mid);
   if (lot.fromProfit) c.append(el('div', 'meta', `Trích lời ${fmt(lot.fromProfit)} USDT`));
   if (lot.note) c.append(el('div', 'meta', lot.note));
@@ -827,7 +917,7 @@ function render() {
   const shown = showHistory ? all : sorted;
   show('ovCost', t.cost, n => fmt(n) + ' USDT');
   $('ovCount').textContent = sorted.length + ' lệnh đang giữ';
-  ['ovQty', 'buyQty'].forEach(id => show(id, t.qty, n => fmt(n, 4)));
+  ['ovQty', 'buyQty'].forEach(id => show(id, t.qty, fmtQty));
   ['ovAvg', 'buyAvg'].forEach(id => show(id, t.avg, fmtPrice));
   $('segOpen').textContent = 'Đang giữ (' + sorted.length + ')';
   $('segAll').textContent = 'Lịch sử (' + all.length + ')';
@@ -838,43 +928,54 @@ function render() {
   $('buyList').replaceChildren(...shown.map(l => card(l, true)));
   renderSell(state, sorted, t);
   fillPrice();
-  $('bkLast').textContent = data.lastBackup ? 'Sao lưu gần nhất: ' + showTime(data.lastBackup) : 'Bạn chưa sao lưu lần nào.';
+  const saved = reg.lastBackup || Store.load('LINK').lastBackup;
+  $('bkLast').textContent = saved ? 'Sao lưu gần nhất: ' + showTime(saved) : 'Bạn chưa sao lưu lần nào.';
   preview();
 }
 
 function preview() {
-  const price = parseNum($('price').value), usdt = parseNum($('usdt').value, true);
+  const price = parsePrice($('price').value), usdt = parseNum($('usdt').value, true);
   const ok = price > 0 && usdt > 0;
   const lots = replay(data).lots;
   const others = openLots(lots).filter(l => l.id !== editId);
   const editingSold = lots.some(l => l.id === editId && isSold(l));
-  $('pvQty').textContent = ok ? fmt(usdt / price, 4) + ' LINK' : '—';
+  $('pvQty').textContent = ok ? fmtQty(usdt / price) + ' ' + coin : '—';
   $('pvAvg').textContent = ok && !editingSold ? fmtPrice(totals([...others, { qty: usdt / price, cost: usdt }]).avg) : '—';
 }
 
-// giá gợi ý = giá lệnh mua gần nhất (không tính lệnh từ lời) trừ 0,3
-const STEP = 0.3;
+// giá gợi ý = giá lệnh mua gần nhất (không tính lệnh từ lời) trừ một bước
 let priceTouched = false;
 const lastPrice = () => data.lots.filter(l => !l.fromProfit).at(-1)?.price;
-const shiftPrice = (p, d) => Math.round((p + d) * 10000) / 10000;
-const asInput = n => String(n).replace('.', ',');
+const shiftPrice = (p, d) => Number((p + d).toPrecision(12));
+const asInput = n => n.toLocaleString('en-US', { useGrouping: false, maximumFractionDigits: 12 }).replace('.', ',');
+// "90.000" có thể là chín mươi nghìn hoặc 90: chọn cách đọc gần với giá đang biết hơn
+function parsePrice(text) {
+  const plain = parseNum(text), t = text.replace(/\s/g, '');
+  const ref = livePrice || lastPrice();
+  if (!ref || !/^[1-9]\d{0,2}(([.]\d{3})+|([,]\d{3})+)$/.test(t)) return plain;
+  const grouped = Number(t.replace(/[.,]/g, '')), far = v => Math.abs(Math.log(v / ref));
+  return far(grouped) < far(plain) ? grouped : plain;
+}
 function fillPrice() {
-  const last = lastPrice(), next = last ? shiftPrice(last, -STEP) : 0;
+  const last = lastPrice(), step = pairStep();
+  const next = last && step ? shiftPrice(last, -step) : 0;
   if (!editId && !priceTouched) $('price').value = next > 0 ? asInput(next) : '';
   $('priceHint').style.visibility = last && !editId ? 'visible' : 'hidden'; // giữ chỗ để trang không nhảy
-  if (last) $('priceHint').textContent = `Lệnh trước: ${fmtPrice(last)} · Mỗi lần bấm ±0,3`;
+  if (last) $('priceHint').textContent = `Lệnh trước: ${fmtPrice(last)} · ` + (step ? `${coin === 'LINK' ? 'Mỗi lần bấm' : 'Bước'} ±${fmtPrice(step)}` : 'Đặt bước giá ở nút +');
 }
-function stepPrice(d) {
-  const base = parseNum($('price').value) || lastPrice();
+function stepPrice(sign) {
+  const step = pairStep();
+  if (!step) { $('error').textContent = 'Bấm nút + ở trên để đặt bước giá cho cặp này.'; return; }
+  const base = parsePrice($('price').value) || lastPrice() || livePrice;
   if (!base) { $('error').textContent = 'Nhập giá trước rồi bấm − hoặc +.'; return; }
-  const next = shiftPrice(base, d);
+  const next = shiftPrice(base, sign * step);
   if (!(next > 0)) return;
   $('price').value = asInput(next);
   $('price').dispatchEvent(new Event('input'));
 }
-[['priceDown', -STEP], ['priceUp', STEP]].forEach(([id, d]) => {
+[['priceDown', -1], ['priceUp', 1]].forEach(([id, sign]) => {
   $(id).addEventListener('pointerdown', e => e.preventDefault()); // không làm đóng/mở bàn phím
-  $(id).addEventListener('click', () => stepPrice(d));
+  $(id).addEventListener('click', () => stepPrice(sign));
 });
 $('price').addEventListener('input', () => priceTouched = true);
 
@@ -893,7 +994,7 @@ function startEdit(id) {
   const l = data.lots.find(x => x.id === id);
   if (!l) return;
   editId = id; timeTouched = true;
-  $('price').value = String(l.price).replace('.', ',');
+  $('price').value = asInput(l.price);
   $('usdt').value = String(l.cost).replace('.', ',');
   $('time').value = l.time;
   $('note').value = l.note;
@@ -914,7 +1015,7 @@ function commit(change, isSale) {
   if (bad) { toast(`Không được: lần bán ${showTime(bad.time)} sẽ bị sai. Hãy huỷ lần bán đó trước.`); return false; }
   const after = freeProfit(next);
   // bán lỗ vẫn được ghi; còn huỷ, sửa, xoá thì không được làm hụt phần lời đã trích
-  if (!isSale && usedProfit(next) > 0 && after < -0.005 && after < before - 0.005) { toast('Không được: số lời này đã trích mua LINK. Hãy xoá lệnh từ lời trước.'); return false; }
+  if (!isSale && usedProfit(next) > 0 && after < -0.005 && after < before - 0.005) { toast(`Không được: số lời này đã trích mua ${coin}. Hãy xoá lệnh từ lời trước.`); return false; }
   if (!Store.save(next)) { toast('Không lưu được. Kiểm tra bộ nhớ hoặc chế độ ẩn danh.'); return false; }
   data = next; render(); return true;
 }
@@ -944,7 +1045,7 @@ $('form').addEventListener('keydown', e => {
 $('submit').addEventListener('click', saveOrder);
 function saveOrder() {
   if (saving && !priceTouched) return; // bấm đúp ngay sau khi lưu thì bỏ qua
-  const price = parseNum($('price').value), cost = parseNum($('usdt').value, true);
+  const price = parsePrice($('price').value), cost = parseNum($('usdt').value, true);
   if (!(price > 0)) { $('error').textContent = 'Nhập giá mua lớn hơn 0.'; $('price').focus(); return; }
   if (!(cost > 0)) { $('error').textContent = 'Nhập số tiền mua lớn hơn 0.'; $('usdt').focus(); return; }
   // người dùng không chỉnh giờ thì lấy giờ lúc bấm lưu
@@ -961,7 +1062,7 @@ function saveOrder() {
   document.activeElement.blur();
   resetForm();
   toast(id ? '✓ Đã lưu thay đổi' : '✓ Đã lưu lệnh mua');
-  if (Store.temp) toast('Chỉ lưu tạm: khung này không cho lưu vào máy');
+  if (Store.blocked) toast('Chỉ lưu tạm: khung này không cho lưu vào máy');
   showSaved(lot.id);
   panel.scrollTop = keep;
   tick();
@@ -1061,21 +1162,21 @@ const parseQty = t => parseNum(/^\s*[1-9]\d{0,2}(\.\d{3})+(,\d*)?\s*$/.test(t) ?
 function renderSell(state, open, t) {
   [...picked].forEach(id => { if (!open.some(l => l.id === id)) picked.delete(id); });
   show('sellAvg', t.avg, fmtPrice);
-  show('sellHold', t.qty, n => fmt(n, 4));
-  $('availQty').textContent = fmt(t.qty, 4);
-  $('modeAll').textContent = open.length ? `Bán toàn bộ ${open.length} lệnh đang giữ.` : 'Chưa có LINK để bán.';
+  show('sellHold', t.qty, fmtQty);
+  $('availQty').textContent = fmtQty(t.qty);
+  $('modeAll').textContent = open.length ? `Bán toàn bộ ${open.length} lệnh đang giữ.` : `Chưa có ${coin} để bán.`;
   $('pickList').replaceChildren(...(open.length ? open.map(l => {
     const row = el('label', 'pick'), box = el('input'), body = el('div');
     box.type = 'checkbox';
     box.checked = picked.has(l.id);
     box.onchange = () => { box.checked ? picked.add(l.id) : picked.delete(l.id); $('sellError').textContent = ''; sellPreview(); };
     const top = el('div', 'row'), low = el('div', 'row meta');
-    top.append(el('strong', '', 'Giá ' + fmtPrice(l.price)), el('span', '', fmt(l.qty, 4) + ' LINK'));
+    top.append(el('strong', '', 'Giá ' + fmtPrice(l.price)), el('span', '', fmtQty(l.qty) + ' ' + coin));
     low.append(el('span', '', (l.fromSale ? 'Lệnh gộp · ' : '') + showTime(l.time)));
     body.append(top, low);
     row.append(box, body);
     return row;
-  }) : [el('p', 'meta field', 'Chưa có LINK để bán.')]));
+  }) : [el('p', 'meta field', `Chưa có ${coin} để bán.`)]));
 
   const list = [...state.sales].reverse();
   $('salesTitle').textContent = `Lịch sử bán (${list.length})`;
@@ -1090,7 +1191,7 @@ function saleCard(s, canCancel) {
   const c = el('article', 'order sale');
   c.dataset.id = s.id;
   const head = el('div', 'row');
-  head.append(el('strong', '', fmt(s.qty, 4) + ' LINK'), el('strong', tone(s.pnl), signed(s.pnl)));
+  head.append(el('strong', '', fmtQty(s.qty) + ' ' + coin), el('strong', tone(s.pnl), signed(s.pnl)));
   c.append(head, el('div', 'meta', modeName[s.mode] + ' · ' + showTime(s.time)));
   [['Giá mua TB', fmtPrice(s.avg)], ['Giá bán', fmtPrice(s.price)], ['Thu về', fmt(s.revenue) + ' USDT']].forEach(([k, v]) => {
     const r = el('div', 'row meta');
@@ -1099,8 +1200,8 @@ function saleCard(s, canCancel) {
   });
   const a = el('div', 'actions'), b = el('button', 'del', 'Huỷ lần bán');
   b.type = 'button';
-  b.onclick = () => ask('Huỷ lần bán này?', [['Số lượng', fmt(s.qty, 4) + ' LINK'], ['Giá bán', fmtPrice(s.price)], ['Lời / lỗ', signed(s.pnl)]],
-    'Số LINK này sẽ trở lại danh sách đang giữ.', 'Huỷ lần bán', 'danger',
+  b.onclick = () => ask('Huỷ lần bán này?', [['Số lượng', fmtQty(s.qty) + ' ' + coin], ['Giá bán', fmtPrice(s.price)], ['Lời / lỗ', signed(s.pnl)]],
+    `Số ${coin} này sẽ trở lại danh sách đang giữ.`, 'Huỷ lần bán', 'danger',
     () => collapse(s.id, () => {
       if (!commit(d => d.sales = d.sales.filter(x => x.id !== s.id))) return false;
       toast('Đã huỷ lần bán');
@@ -1114,15 +1215,15 @@ function plan(d) {
   const open = openLots(replay(d).lots);
   const used = sellMode === 'select' ? open.filter(l => picked.has(l.id)) : open;
   const hold = totals(open), t = totals(used);
-  const price = parseNum($('sellPrice').value);
+  const price = parsePrice($('sellPrice').value);
   let qty = t.qty, mode = sellMode, error = '';
-  if (!open.length) error = 'Chưa có LINK để bán.';
+  if (!open.length) error = `Chưa có ${coin} để bán.`;
   else if (sellMode === 'select' && !used.length) error = 'Chọn ít nhất một lệnh để bán.';
   else if (sellMode === 'qty') {
     const q = parseQty($('sellQty').value);
-    if (!(q >= EPS)) { error = 'Nhập số LINK muốn bán.'; qty = 0; }
-    else if (q > t.qty + EPS) { error = `Bạn chỉ đang giữ ${fmt(t.qty, 4)} LINK.`; qty = 0; }
-    else if (t.qty - q > EPS) qty = q;
+    if (!(q >= qtyEps(t.qty))) { error = `Nhập số ${coin} muốn bán.`; qty = 0; }
+    else if (q > t.qty + qtyEps(t.qty)) { error = `Bạn chỉ đang giữ ${fmtQty(t.qty)} ${coin}.`; qty = 0; }
+    else if (t.qty - q > qtyEps(t.qty)) qty = q;
     else mode = 'all';
   }
   if (!error && !(price > 0)) error = 'Nhập giá bán lớn hơn 0.';
@@ -1152,13 +1253,13 @@ function sellPreview() {
   fillSell();
   const p = plan(data), has = p.qty > 0 && p.avg !== null, priced = has && p.price > 0;
   const cost = has ? p.qty * p.avg : 0, pnl = priced ? p.qty * p.price - cost : 0;
-  $('sQty').textContent = has ? fmt(p.qty, 4) + ' LINK' : '—';
+  $('sQty').textContent = has ? fmtQty(p.qty) + ' ' + coin : '—';
   $('sAvg').textContent = has ? fmtPrice(p.avg) : '—';
   $('sPrice').textContent = p.price > 0 ? fmtPrice(p.price) : '—';
   $('sRev').textContent = priced ? fmt(p.qty * p.price) + ' USDT' : '—';
   $('sPnl').textContent = priced ? signed(pnl) + pct(pnl, cost) : '—';
   $('sPnl').className = priced ? tone(pnl) : '';
-  $('sRest').textContent = has ? fmt(p.rest, 4) + ' LINK' : '—';
+  $('sRest').textContent = has ? fmtQty(p.rest) + ' ' + coin : '—';
 }
 
 // ---------- Lời / Lỗ ----------
@@ -1185,11 +1286,11 @@ function showRef() {
 
 function renderLive() {
   const t = totals(openLots(replay(data).lots));
-  const manual = priceFailed ? parseNum($('uManual').value) : NaN;
+  const manual = priceFailed ? parsePrice($('uManual').value) : NaN;
   const price = livePrice || (manual > 0 ? manual : null);
-  const has = t.qty >= EPS, ok = has && price !== null;
+  const has = t.qty >= qtyEps(t.qty) && t.qty > 1e-9, ok = has && price !== null;
   const pnl = ok ? t.qty * price - t.cost : 0;
-  $('uQty').textContent = fmt(t.qty, 4) + ' LINK';
+  $('uQty').textContent = fmtQty(t.qty) + ' ' + coin;
   $('uAvg').textContent = has ? fmtPrice(t.avg) : '—';
   $('uCost').textContent = fmt(has ? t.cost : 0) + ' USDT';
   $('uPrice').textContent = price !== null ? fmtPrice(price) : '—';
@@ -1200,7 +1301,7 @@ function renderLive() {
     if (percent) $('uValue').append(el('span', 'upct', percent));
   });
   $('uValue').className = 'value ' + (ok ? tone(pnl) : '');
-  $('uNote').textContent = !has ? 'Không còn LINK đang giữ.'
+  $('uNote').textContent = !has ? `Không còn ${coin} đang giữ.`
     : livePrice ? 'Giá Binance lúc ' + liveTime
     : priceFailed ? (ok ? 'Đang tính thử theo giá bạn nhập, không phải giá Binance.' : 'Chưa lấy được giá Binance.')
     : 'Đang lấy giá…';
@@ -1224,7 +1325,7 @@ function renderProfit(sales) {
 }
 
 function reInput() {
-  const amount = parseNum($('reAmount').value, true), price = parseNum($('rePrice').value);
+  const amount = parseNum($('reAmount').value, true), price = parsePrice($('rePrice').value);
   const free = freeProfit(data);
   let error = '';
   if (free < 0.01) error = 'Chưa có lời để trích.';
@@ -1238,12 +1339,12 @@ function rePreview() {
   const p = reInput(), open = openLots(replay(data).lots), old = totals(open);
   const ok = p.amount > 0 && p.price > 0;
   const next = ok ? totals([...open, p]) : null;
-  $('planNote').textContent = plan2 === 1 ? 'LINK mua thêm có giá vốn 0 USDT, giá trung bình giảm nhiều hơn.' : 'Số lời đem mua được tính là vốn gốc, như một lệnh mua bình thường.';
-  $('reQty').textContent = ok ? fmt(p.qty, 4) + ' LINK' : '—';
+  $('planNote').textContent = plan2 === 1 ? `${coin} mua thêm có giá vốn 0 USDT, giá trung bình giảm nhiều hơn.` : 'Số lời đem mua được tính là vốn gốc, như một lệnh mua bình thường.';
+  $('reQty').textContent = ok ? fmtQty(p.qty) + ' ' + coin : '—';
   $('reCost').textContent = ok ? fmt(p.cost) + ' USDT' : '—';
   $('reOld').textContent = fmtPrice(old.avg);
   $('reNew').textContent = ok ? fmtPrice(next.avg) : '—';
-  $('reHold').textContent = ok ? fmt(next.qty, 4) + ' LINK' : '—';
+  $('reHold').textContent = ok ? fmtQty(next.qty) + ' ' + coin : '—';
 }
 
 function askReinvest() {
@@ -1253,13 +1354,13 @@ function askReinvest() {
   if (p.error) return;
   const lot = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), price: p.price, qty: p.qty, cost: p.cost, fromProfit: p.amount, plan: plan2, note: '' };
   const next = totals([...openLots(replay(data).lots), lot]);
-  ask('Trích lời mua thêm?', [['Phương án', plan2 === 1 ? '1: Vốn 0' : '2: Tính vốn'], ['Lời trích', fmt(p.amount) + ' USDT'], ['Giá mua', fmtPrice(p.price)], ['LINK mua thêm', fmt(p.qty, 4)], ['Giá TB mới', fmtPrice(next.avg)]],
+  ask('Trích lời mua thêm?', [['Phương án', plan2 === 1 ? '1: Vốn 0' : '2: Tính vốn'], ['Lời trích', fmt(p.amount) + ' USDT'], ['Giá mua', fmtPrice(p.price)], [coin + ' mua thêm', fmtQty(p.qty)], ['Giá TB mới', fmtPrice(next.avg)]],
     '', 'Mua thêm', '', () => {
       if (!commit(d => d.lots.push({ ...lot, time: localTime() }))) return;
       $('reAmount').value = $('rePrice').value = '';
       rePreview();
       tick();
-      toast('✓ Đã mua thêm LINK từ lời');
+      toast(`✓ Đã mua thêm ${coin} từ lời`);
     });
 }
 $('reBtn').addEventListener('click', askReinvest);
@@ -1352,7 +1453,7 @@ function setMode(mode) {
 ['sellPrice', 'sellQty'].forEach(i => $(i).addEventListener('input', () => { $('sellError').textContent = ''; sellPreview(); }));
 $('maxQty').onclick = () => {
   const qty = totals(openLots(replay(data).lots)).qty;
-  $('sellQty').value = fmt(qty, 4);
+  $('sellQty').value = fmtQty(qty);
   sellPreview();
 };
 
@@ -1364,7 +1465,7 @@ function askSell() {
   const pnl = p.qty * (p.price - p.avg);
   // giữ nguyên số liệu đã xác nhận để ghi đúng như hộp thoại
   const sale = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), mode: p.mode, price: p.price, qty: p.qty, lotIds: p.lotIds };
-  ask('Xác nhận bán?', [['Số lượng', fmt(p.qty, 4) + ' LINK'], ['Giá bán', fmtPrice(p.price)], ['Lời / lỗ', signed(pnl)], ['Còn lại', fmt(p.rest, 4) + ' LINK']],
+  ask('Xác nhận bán?', [['Số lượng', fmtQty(p.qty) + ' ' + coin], ['Giá bán', fmtPrice(p.price)], ['Lời / lỗ', signed(pnl)], ['Còn lại', fmtQty(p.rest) + ' ' + coin]],
     '', 'Lưu lệnh bán', 'amber', () => {
       if (!commit(d => d.sales.push({ ...sale, time: localTime() }), true)) return;
       picked.clear();
@@ -1386,7 +1487,9 @@ let fetching = false, misses = 0, tickerPrice = null;
 function showTicker() {
   document.querySelectorAll('.ticker').forEach(box => {
     box.classList.toggle('off', !livePrice);
-    box.querySelector('b').textContent = livePrice ? fmtPrice(livePrice) : '—';
+    const big = box.querySelector('b');
+    big.textContent = livePrice ? fmtPrice(livePrice) : '—';
+    big.style.fontSize = big.textContent.length > 8 ? '19px' : '';
     box.querySelector('small').textContent = livePrice ? 'Giá mua Binance' : priceFailed ? 'Mất kết nối' : 'Đang lấy giá…';
     if (livePrice && tickerPrice !== null && livePrice !== tickerPrice) {
       box.classList.remove('tang', 'giam');
@@ -1399,21 +1502,28 @@ function showTicker() {
 async function fetchPrice() {
   if (fetching) return;
   fetching = true;
+  const asked = coin;
   const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
   try {
-    const r = await fetch('https://data-api.binance.vision/api/v3/ticker/bookTicker?symbol=LINKUSDT', { signal: abort.signal, cache: 'no-store' });
+    const r = await fetch('https://data-api.binance.vision/api/v3/ticker/bookTicker?symbol=' + asked + 'USDT', { signal: abort.signal, cache: 'no-store' });
     const price = Number((await r.json()).bidPrice);
     if (!r.ok || !(price > 0)) throw new Error('price');
+    if (asked !== coin) return; // đã đổi cặp trong lúc chờ
+    if (!pairStep()) { reg = loadReg(); const p = reg.list.find(x => x.coin === asked); if (p) { p.step = autoStep(price); saveReg(); fillPrice(); } }
     misses = 0; livePrice = price; priceFailed = false; liveTime = new Date().toLocaleTimeString('vi-VN');
     $('refPrice').textContent = fmtPrice(price) + ' USDT';
     $('refNote').textContent = 'Cập nhật lúc ' + liveTime;
   } catch (e) {
+    if (asked !== coin) return;
     // rớt một hai nhịp thì giữ giá cũ, tránh nhấp nháy; lâu hơn mới báo mất kết nối
     if (livePrice && ++misses < 3) return;
     livePrice = null; priceFailed = true;
     $('refPrice').textContent = '—';
     $('refNote').textContent = 'Chưa lấy được giá. Bạn vẫn nhập giá bán bên dưới được.';
-  } finally { clearTimeout(stop); fetching = false; renderLive(); showTicker(); sellPreview(); }
+  } finally {
+    clearTimeout(stop);
+    if (asked === coin) { fetching = false; renderLive(); showTicker(); sellPreview(); }
+  }
 }
 setInterval(() => { if (!document.hidden) fetchPrice(); }, 2000);
 // mở lại app thì lấy giá ngay
@@ -1421,10 +1531,19 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) fetc
 
 // ---------- Sao lưu & khôi phục ----------
 function backupText() {
-  const d = Store.load();
-  return JSON.stringify({ app: 'linkdca', version: 1, time: localTime(), data: { lots: d.lots, sales: d.sales, lastUsdt: d.lastUsdt } });
+  reg = loadReg();
+  const pairs = reg.list.map(p => {
+    const d = Store.load(p.coin);
+    return { coin: p.coin, step: p.step, lots: d.lots, sales: d.sales, lastUsdt: d.lastUsdt };
+  });
+  return JSON.stringify({ app: 'linkdca', version: 2, time: localTime(), pairs });
 }
-const markBackup = () => commit(d => d.lastBackup = localTime(), true);
+function markBackup() {
+  reg = loadReg();
+  reg.lastBackup = localTime();
+  saveReg();
+  render();
+}
 
 // khung xem trước (iframe) không cho tải file, nên chỉ hiện nút tải khi mở trực tiếp
 $('bkFileBtn').hidden = window.self !== window.top;
@@ -1446,15 +1565,20 @@ function readBackup(text) {
   const id = x => typeof x === 'string' && /^[\w-]+$/.test(x);
   const time = x => typeof x === 'string' && /^\d{4}-\d\d-\d\dT\d\d:\d\d/.test(x) && !isNaN(new Date(x));
   const unique = list => new Set(list.map(x => x.id)).size === list.length;
-  if (!b || b.app !== 'linkdca' || b.version !== 1) throw new Error('app');
-  const { lots, sales, lastUsdt } = b.data;
+  if (!b || b.app !== 'linkdca' || (b.version !== 1 && b.version !== 2)) throw new Error('app');
+  // bản cũ (1) chỉ có LINK
+  const source = b.version === 1 ? [{ ...b.data, coin: 'LINK' }] : b.pairs;
+  if (!Array.isArray(source) || !source.length || !source.every(p => p && coinOk(p.coin)) || new Set(source.map(p => p.coin)).size !== source.length) throw new Error('pairs');
   const lotOk = l => id(l.id) && num(l.price) && l.price > 0 && num(l.qty) && l.qty > 0 && num(l.cost) && l.cost >= 0 && time(l.time) && typeof l.note === 'string'
     && (l.fromProfit === undefined || (num(l.fromProfit) && l.fromProfit > 0 && (l.plan === 1 || l.plan === 2)));
   const saleOk = x => id(x.id) && ['select', 'qty', 'all'].includes(x.mode) && num(x.price) && x.price > 0 && time(x.time)
     && Array.isArray(x.lotIds) && x.lotIds.every(id) && new Set(x.lotIds).size === x.lotIds.length && (x.mode !== 'qty' || (num(x.qty) && x.qty > 0));
-  if (!Array.isArray(lots) || !Array.isArray(sales) || !lots.every(lotOk) || !sales.every(saleOk) || !unique(lots) || !unique(sales)) throw new Error('data');
-  if (replay({ lots, sales }).error) throw new Error('sales');
-  return { time: time(b.time) ? b.time : null, lots, sales, lastUsdt: num(lastUsdt) && lastUsdt > 0 ? lastUsdt : 1000 };
+  const pairs = source.map(({ coin: c, step, lots, sales, lastUsdt }) => {
+    if (!Array.isArray(lots) || !Array.isArray(sales) || !lots.every(lotOk) || !sales.every(saleOk) || !unique(lots) || !unique(sales)) throw new Error('data');
+    if (replay({ lots, sales }, c).error) throw new Error('sales');
+    return { coin: c, step: stepOk(step) ? step : null, lots, sales, lastUsdt: num(lastUsdt) && lastUsdt > 0 ? lastUsdt : 1000 };
+  });
+  return { time: time(b.time) ? b.time : null, pairs };
 }
 
 function askRestore(text) {
@@ -1462,18 +1586,21 @@ function askRestore(text) {
   $('bkError').textContent = '';
   try { b = readBackup(text); }
   catch (e) { $('bkError').textContent = 'Không đọc được file này. Hãy chọn đúng file sao lưu .json.'; return; }
-  const now = Store.load();
-  ask('Khôi phục dữ liệu?', [['Ngày sao lưu', b.time ? showTime(b.time) : 'Không rõ'], ['Bản sao lưu', `${b.lots.length} lệnh mua, ${b.sales.length} lần bán`], ['Hiện tại', `${now.lots.length} lệnh mua, ${now.sales.length} lần bán`]],
-    'Toàn bộ dữ liệu hiện tại sẽ bị thay thế.', 'Khôi phục', 'danger', () => {
-      const next = { ...Store.load(), lots: b.lots, sales: b.sales, lastUsdt: b.lastUsdt };
-      if (!Store.save(next)) return;
-      data = next;
-      picked.clear();
-      $('sellPrice').value = $('sellQty').value = $('reAmount').value = $('rePrice').value = '';
-      resetForm();
-      render();
-      toast(Store.temp ? 'Đã khôi phục tạm: khung này không cho lưu vào máy' : '✓ Đã khôi phục dữ liệu');
-    });
+  const count = d => `${d.lots.length} mua, ${d.sales.length} bán`;
+  const rows = [['Ngày sao lưu', b.time ? showTime(b.time) : 'Không rõ']];
+  b.pairs.forEach(p => rows.push([p.coin + ' trong file', count(p)], [p.coin + ' hiện tại', count(Store.load(p.coin))]));
+  ask('Khôi phục dữ liệu?', rows, 'Dữ liệu của các cặp có trong file sẽ bị thay thế. Cặp khác giữ nguyên.', 'Khôi phục', 'danger', () => {
+    reg = loadReg();
+    for (const p of b.pairs) {
+      if (!Store.save({ ...Store.load(p.coin), lots: p.lots, sales: p.sales, lastUsdt: p.lastUsdt }, p.coin)) return;
+      const have = reg.list.find(x => x.coin === p.coin);
+      if (!have) reg.list.push({ coin: p.coin, step: p.step });
+      else if (p.step) have.step = p.step;
+    }
+    saveReg();
+    openPair(coin);
+    toast(Store.blocked ? 'Đã khôi phục tạm: khung này không cho lưu vào máy' : '✓ Đã khôi phục dữ liệu');
+  });
 }
 $('rsFileBtn').onclick = () => $('rsFile').click();
 $('rsFile').onchange = async () => {
@@ -1484,9 +1611,193 @@ $('rsFile').onchange = async () => {
   catch (e) { $('bkError').textContent = 'Không mở được file này.'; }
 };
 
-// mở app ở hai cửa sổ thì dữ liệu vẫn khớp
-window.addEventListener('storage', e => { if (e.key === Store.key) { data = Store.load(); render(); } });
+// ---------- Cặp giao dịch ----------
+// bước giá gợi ý khoảng 3% giá, làm tròn một chữ số (LINK 9,7 → 0,3)
+const autoStep = price => Number((price * .03).toPrecision(1));
 
+// hàng nút cặp ở đầu mỗi tab, cặp đang mở luôn nằm trong tầm nhìn
+function drawChips() {
+  document.querySelectorAll('.chips').forEach(row => {
+    row.replaceChildren(...reg.list.map(p => {
+      const b = el('button', '', p.coin);
+      b.type = 'button';
+      b.dataset.coin = p.coin;
+      b.setAttribute('aria-pressed', p.coin === coin);
+      b.onclick = () => { if (p.coin !== coin) openPair(p.coin); };
+      return b;
+    }));
+    const on = row.querySelector('[aria-pressed="true"]');
+    if (on) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+  });
+}
+
+function applyCoin() {
+  drawChips();
+  document.querySelectorAll('x-coin').forEach(e => e.textContent = coin);
+  document.querySelectorAll('.pairname').forEach(e => e.textContent = coin + '/USDT');
+  $('price').placeholder = coin === 'LINK' ? 'Ví dụ 9,7' : 'Nhập giá';
+  $('sellQty').placeholder = coin === 'LINK' ? 'Ví dụ 50' : 'Nhập số lượng';
+  $('uManual').placeholder = coin === 'LINK' ? 'Ví dụ 9,7' : 'Nhập giá';
+  const step = pairStep();
+  $('priceDown').setAttribute('aria-label', 'Giảm giá' + (step ? ' ' + fmtPrice(step) : ''));
+  $('priceUp').setAttribute('aria-label', 'Tăng giá' + (step ? ' ' + fmtPrice(step) : ''));
+}
+
+// mở một cặp: xoá mọi thứ đang nhập dở của cặp trước rồi vẽ lại từ đầu
+function openPair(c) {
+  if (c !== coin) {
+    coin = c;
+    reg = loadReg(); reg.active = c; saveReg();
+  }
+  data = Store.load();
+  data.lastTab = current; Store.save(data);
+  livePrice = null; priceFailed = false; misses = 0; tickerPrice = shownRef = null; fetching = false;
+  picked.clear(); sellTouched = false; saving = false; showHistory = false;
+  ['sellPrice', 'sellQty', 'reAmount', 'rePrice', 'uManual'].forEach(i => $(i).value = '');
+  ['sellError', 'reError', 'bkError'].forEach(i => $(i).textContent = '');
+  $('refPrice').textContent = '—'; $('refNote').textContent = 'Đang lấy giá…';
+  $('seg').classList.remove('history');
+  $('segOpen').setAttribute('aria-pressed', true); $('segAll').setAttribute('aria-pressed', false);
+  numbers.forEach(i => { const node = $(i); cancelAnimationFrame(node._raf); node._seen = node._to = undefined; });
+  applyCoin();
+  resetForm();
+  setMode('select');
+  $('plModes').children[2].click();
+  $('plans').children[0].click();
+  render();
+  panels.forEach(p => p.scrollTop = 0);
+  showTicker();
+  fetchPrice();
+}
+
+const drawer = $('drawer');
+let drawerTimer = null;
+function listPairs() {
+  $('pairList').replaceChildren(...reg.list.map(p => {
+    const d = Store.load(p.coin), row = el('div', 'pair'), pick = el('button', 'pick-pair'), text = el('span');
+    pick.type = 'button';
+    pick.dataset.coin = p.coin;
+    pick.setAttribute('aria-current', p.coin === coin);
+    text.append(el('strong', '', p.coin + '/USDT'), el('small', '', openLots(replay(d, p.coin).lots).length + ' lệnh đang giữ'));
+    pick.append(text);
+    pick.onclick = () => { if (p.coin !== coin) openPair(p.coin); closeDrawer(); };
+    row.append(pick);
+    if (p.coin !== 'LINK') {
+      const del = el('button', 'del-pair', 'Xoá');
+      del.type = 'button';
+      del.setAttribute('aria-label', 'Xoá cặp ' + p.coin + '/USDT');
+      del.onclick = () => askRemovePair(p.coin);
+      row.append(del);
+    }
+    return row;
+  }));
+  $('stepPair').textContent = coin + '/USDT';
+  $('curStep').value = pairStep() ? asInput(pairStep()) : '';
+}
+function openDrawer() {
+  document.activeElement.blur();
+  reg = loadReg();
+  const look = getComputedStyle(panels[current]);
+  ['--blue', '--blue-soft', '--blue-deep'].forEach(v => drawer.style.setProperty(v, look.getPropertyValue(v)));
+  clearTimeout(drawerTimer); drawerTimer = null;
+  drawer.classList.remove('closing');
+  $('newPair').value = $('pairError').textContent = '';
+  unsure = '';
+  listPairs();
+  if (!drawer.open) drawer.showModal();
+  drawer.scrollTop = 0;
+}
+function closeDrawer() {
+  if (!drawer.open || drawerTimer) return;
+  document.activeElement.blur();
+  drawer.classList.add('closing');
+  drawerTimer = setTimeout(() => { drawerTimer = null; drawer.close(); drawer.classList.remove('closing'); }, calm() ? 0 : 200);
+}
+document.querySelectorAll('.addpair').forEach(b => b.onclick = openDrawer);
+$('drawerClose').onclick = closeDrawer;
+drawer.addEventListener('cancel', e => { e.preventDefault(); closeDrawer(); });
+// chạm vào vùng tối bên phải thì đóng
+let beside = false;
+const offDrawer = e => e.target === drawer && e.clientX > drawer.getBoundingClientRect().right;
+drawer.addEventListener('pointerdown', e => beside = offDrawer(e));
+drawer.addEventListener('click', e => { if (beside && offDrawer(e)) closeDrawer(); });
+
+$('curStep').addEventListener('input', () => {
+  const step = parsePrice($('curStep').value);
+  if (!(step > 0)) return;
+  reg = loadReg();
+  reg.list.find(p => p.coin === coin).step = step;
+  saveReg();
+  applyCoin();
+  fillPrice();
+  preview();
+});
+$('curStep').addEventListener('keydown', e => { if (e.key === 'Enter') $('curStep').blur(); });
+
+function askRemovePair(c) {
+  const d = Store.load(c);
+  ask(`Xoá cặp ${c}/USDT?`, [['Lệnh mua', String(d.lots.length)], ['Lần bán', String(d.sales.length)]],
+    'Toàn bộ dữ liệu của cặp này sẽ bị xoá, không khôi phục được.', 'Xoá cặp', 'danger', () => {
+      reg = loadReg();
+      reg.list = reg.list.filter(p => p.coin !== c);
+      if (reg.active === c) reg.active = 'LINK';
+      saveReg();
+      Store.remove(c);
+      if (coin === c) openPair('LINK');
+      listPairs();
+      drawChips();
+      toast(`Đã xoá cặp ${c}/USDT`);
+    });
+}
+
+function addPair(c, price) {
+  reg = loadReg();
+  reg.list.push({ coin: c, step: price ? autoStep(price) : null });
+  saveReg();
+  openPair(c);
+  closeDrawer();
+  toast(`✓ Đã tạo cặp ${c}/USDT`);
+}
+let unsure = '', checking = false;
+$('newPair').addEventListener('input', () => { $('pairError').textContent = ''; unsure = ''; });
+$('pairForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (checking) return;
+  // nhận "btc", "BTC/USDT", "btcusdt"
+  const c = $('newPair').value.toUpperCase().replace(/[\s\/\-_]/g, '').replace(/(.{2,})USDT$/, '$1');
+  const say = text => $('pairError').textContent = text;
+  if (!coinOk(c)) { say('Nhập tên coin, ví dụ BTC.'); return; }
+  if (loadReg().list.some(p => p.coin === c)) { openPair(c); closeDrawer(); return; }
+  if (unsure === c) { addPair(c, null); return; }
+  checking = true;
+  $('pairAdd').textContent = 'Đang kiểm tra…';
+  const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
+  try {
+    const r = await fetch('https://data-api.binance.vision/api/v3/ticker/bookTicker?symbol=' + c + 'USDT', { signal: abort.signal, cache: 'no-store' });
+    if (r.status === 400) say(`Binance không có cặp ${c}/USDT.`);
+    else {
+      const price = Number((await r.json()).bidPrice);
+      if (!r.ok) throw new Error('net');
+      if (!(price > 0)) say(`Cặp ${c}/USDT hiện không giao dịch trên Binance.`);
+      else if (drawer.open) addPair(c, price);
+    }
+  } catch (err) {
+    unsure = c;
+    say('Chưa kiểm tra được với Binance. Bấm Tạo cặp lần nữa nếu vẫn muốn tạo.');
+  } finally {
+    clearTimeout(stop);
+    checking = false;
+    $('pairAdd').textContent = 'Tạo cặp';
+  }
+});
+
+// mở app ở hai cửa sổ thì dữ liệu vẫn khớp
+window.addEventListener('storage', e => {
+  if (e.key === REG) { reg = loadReg(); if (!reg.list.some(p => p.coin === coin)) openPair('LINK'); else drawChips(); }
+  else if (e.key === Store.key) { data = Store.load(); render(); }
+});
+
+applyCoin();
 resetForm();
 render();
 
