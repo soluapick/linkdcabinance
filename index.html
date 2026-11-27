@@ -265,6 +265,12 @@ input::placeholder{font-weight:400;color:#8A95AD}
   .sum b,.grid .card .value{font-size:21px}
   .seg.three button,.seg.plan button{font-size:14px}
 }
+
+.stepper{display:flex;gap:8px}
+.stepper input{flex:1;text-align:center;font-size:23px}
+.stepper button{flex:none;width:56px;height:54px;border:0;border-radius:14px;background:var(--blue-soft);color:var(--blue);font-family:inherit;font-size:30px;font-weight:600;line-height:1;cursor:pointer;touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .15s,background .2s}
+.stepper button:active{transform:scale(.9);background:var(--blue);color:#fff}
+#priceHint{margin-top:6px;text-align:center;white-space:nowrap;overflow:hidden;font-size:14px;visibility:hidden}
 </style>
 </head>
 <body>
@@ -312,7 +318,7 @@ input::placeholder{font-weight:400;color:#8A95AD}
           <div><span>LINK đang giữ</span><b id="buyQty">0</b></div>
         </div>
         <form id="form" novalidate autocomplete="off">
-          <div class="field"><label for="price">Giá mua (USDT)</label><input id="price" inputmode="decimal" placeholder="Ví dụ 9,7"></div>
+          <div class="field"><label for="price">Giá mua (USDT)</label><div class="stepper"><button type="button" id="priceDown" aria-label="Giảm giá 0,3">−</button><input id="price" inputmode="decimal" placeholder="Ví dụ 9,7"><button type="button" id="priceUp" aria-label="Tăng giá 0,3">+</button></div><div class="meta" id="priceHint">&nbsp;</div></div>
           <div class="field"><label for="usdt">Số tiền mua (USDT)</label><input id="usdt" inputmode="decimal" placeholder="Ví dụ 1000"></div>
           <div class="field"><label for="time">Thời gian mua</label><input id="time" type="datetime-local"></div>
           <div class="field"><label for="note">Ghi chú (không bắt buộc)</label><input id="note" maxlength="120"></div>
@@ -668,6 +674,7 @@ function render() {
   $('ovList').replaceChildren(...sorted.slice(0, 5).map(l => card(l, false)));
   $('buyList').replaceChildren(...shown.map(l => card(l, true)));
   renderSell(state, sorted, t);
+  fillPrice();
   $('bkLast').textContent = data.lastBackup ? 'Sao lưu gần nhất: ' + showTime(data.lastBackup) : 'Bạn chưa sao lưu lần nào.';
   preview();
 }
@@ -682,13 +689,40 @@ function preview() {
   $('pvAvg').textContent = ok && !editingSold ? fmtPrice(totals([...others, { qty: usdt / price, cost: usdt }]).avg) : '—';
 }
 
+// giá gợi ý = giá lệnh mua gần nhất (không tính lệnh từ lời) trừ 0,3
+const STEP = 0.3;
+let priceTouched = false;
+const lastPrice = () => data.lots.filter(l => !l.fromProfit).at(-1)?.price;
+const shiftPrice = (p, d) => Math.round((p + d) * 10000) / 10000;
+const asInput = n => String(n).replace('.', ',');
+function fillPrice() {
+  const last = lastPrice(), next = last ? shiftPrice(last, -STEP) : 0;
+  if (!editId && !priceTouched) $('price').value = next > 0 ? asInput(next) : '';
+  $('priceHint').style.visibility = last && !editId ? 'visible' : 'hidden'; // giữ chỗ để trang không nhảy
+  if (last) $('priceHint').textContent = `Lệnh trước: ${fmtPrice(last)} · Mỗi lần bấm ±0,3`;
+}
+function stepPrice(d) {
+  const base = parseNum($('price').value) || lastPrice();
+  if (!base) { $('error').textContent = 'Nhập giá trước rồi bấm − hoặc +.'; return; }
+  const next = shiftPrice(base, d);
+  if (!(next > 0)) return;
+  $('price').value = asInput(next);
+  $('price').dispatchEvent(new Event('input'));
+}
+[['priceDown', -STEP], ['priceUp', STEP]].forEach(([id, d]) => {
+  $(id).addEventListener('pointerdown', e => e.preventDefault()); // không làm đóng/mở bàn phím
+  $(id).addEventListener('click', () => stepPrice(d));
+});
+$('price').addEventListener('input', () => priceTouched = true);
+
 function resetForm() {
-  editId = null; timeTouched = false;
+  editId = null; timeTouched = false; priceTouched = false;
   $('price').value = $('note').value = $('error').textContent = '';
   $('usdt').value = String(data.lastUsdt).replace('.', ',');
   $('time').value = localTime();
   $('submit').textContent = 'Lưu lệnh mua';
   $('cancel').hidden = true;
+  fillPrice();
   preview();
 }
 
@@ -703,6 +737,7 @@ function startEdit(id) {
   $('error').textContent = '';
   $('submit').textContent = 'Lưu thay đổi';
   $('cancel').hidden = false;
+  fillPrice();
   preview();
   $('p1').scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -728,13 +763,24 @@ $('submit').addEventListener('pointerdown', e => e.preventDefault());
 document.addEventListener('focusout', () => setTimeout(() => {
   if (!document.activeElement.matches('input')) window.scrollTo(0, 0);
 }, 60));
+// chạm ra khoảng trống thì ẩn bàn phím; vuốt cuộn trang thì không
+let tapStart = null;
+const app = document.querySelector('.app');
+app.addEventListener('pointerdown', e => tapStart = e.isPrimary ? { x: e.clientX, y: e.clientY } : null);
+app.addEventListener('pointercancel', () => tapStart = null);
+app.addEventListener('pointerup', e => {
+  const start = tapStart, box = document.activeElement;
+  tapStart = null;
+  if (!start || !box.matches('input') || Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10) return;
+  if (!e.target.closest('input, button, label, a, .stepper, .with-btn')) box.blur();
+});
 $('form').addEventListener('submit', e => e.preventDefault());
 $('form').addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); saveOrder(); }
 });
 $('submit').addEventListener('click', saveOrder);
 function saveOrder() {
-  if (saving && !$('price').value) return; // bấm đúp ngay sau khi lưu thì bỏ qua
+  if (saving && !priceTouched) return; // bấm đúp ngay sau khi lưu thì bỏ qua
   const price = parseNum($('price').value), cost = parseNum($('usdt').value, true);
   if (!(price > 0)) { $('error').textContent = 'Nhập giá mua lớn hơn 0.'; $('price').focus(); return; }
   if (!(cost > 0)) { $('error').textContent = 'Nhập số tiền mua lớn hơn 0.'; $('usdt').focus(); return; }
