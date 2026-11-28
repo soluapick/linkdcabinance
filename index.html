@@ -8,12 +8,17 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sổ Lệnh Coin">
 <title>Sổ Lệnh Coin</title>
+<script>
+// chọn sáng/tối trước khi vẽ trang để không bị chớp
+(function(){var t;try{t=localStorage.getItem('linkdca.v1.theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   --blue:#1E4FBF; --blue-deep:#102F77; --blue-soft:#E6EDFC;
   --amber:#FFB020; --amber-soft:#FFF3DA; --amber-ink:#7A4E00;
   --bg:#F3F6FC; --card:#fff; --ink:#0E1B35; --muted:#55627D; --line:#DFE6F3;
+  --up:#0B7A3B; --down:#C0261C;
   --nav-h:76px; --ease:cubic-bezier(.22,.9,.28,1);
   color-scheme:light;
 }
@@ -379,8 +384,8 @@ x-coin{display:inline}
 .tfs button{flex:1 1 auto;height:38px;padding:0 2px;border:0;border-radius:9px;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--blue);white-space:nowrap;cursor:pointer;transition:background-color .25s,color .25s}
 .tfs button[aria-pressed="true"]{background:var(--blue);color:#fff}
 .cinfo{margin:8px 0 4px;font-size:12.5px;line-height:18px;font-variant-numeric:tabular-nums}
-.ctime{display:block;min-height:18px;font-weight:800;color:#1E4FBF}
-.ctime.bad{color:#C0261C}
+.cavg{display:block;min-height:20px;font-size:14px;line-height:20px;font-weight:600;color:#1E4FBF}
+.cavg b{font-size:16px;font-weight:800}
 .cohlc{display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:8px;min-height:18px;font-weight:600}
 .cohlc.two{display:grid;grid-template-columns:1fr 1fr}
 .cohlc span{white-space:nowrap}
@@ -407,6 +412,65 @@ x-coin{display:inline}
 .cboll span:nth-child(2){color:#C2358F}
 .cboll span:nth-child(3){color:#6F4BD8}
 @media (max-width:359px){.cboll{min-height:36px}}
+/* ---- Giao diện tối ---- */
+.themebtn{flex:none;width:44px;height:52px;display:grid;place-items:center;border:1.5px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:18px;background:#fff;color:var(--blue);cursor:pointer;transition:transform .15s,background-color .25s,color .25s}
+.themebtn:active{transform:scale(.92)}
+.themebtn svg{width:22px;height:22px}
+.themebtn .sun,:root[data-theme="dark"] .themebtn .moon{display:none}
+:root[data-theme="dark"] .themebtn .sun{display:block}
+.pairbar .chips{margin-right:auto}
+@media (max-width:359px){.pairbar{gap:6px}.themebtn,.addpair{width:40px}}
+:root[data-theme="dark"]{--bg:#0B101A;--card:#151C2A;--ink:#E8EDF7;--muted:#9AA7BF;--line:#2A3447;--on:#0B1220;--up:#3DD598;--down:#FF7B72;color-scheme:dark}
+:root[data-theme="dark"] #p0,:root[data-theme="dark"] #t0{--blue:#82AAFF;--blue-deep:#C9D9FF;--blue-soft:#1B2947;--hero1:#2457C5;--hero2:#132B66}
+:root[data-theme="dark"] #p1,:root[data-theme="dark"] #t1{--blue:#4FD1C0;--blue-deep:#B8F0E7;--blue-soft:#11302E;--hero1:#11766D;--hero2:#093A36}
+:root[data-theme="dark"] #p2,:root[data-theme="dark"] #t2{--blue:#A9A1FF;--blue-deep:#DCD9FF;--blue-soft:#242250;--hero1:#4F46A5;--hero2:#27225A}
+:root[data-theme="dark"] #p3,:root[data-theme="dark"] #t3{--blue:#C99DF4;--blue-deep:#E9D8FB;--blue-soft:#32204A;--hero1:#6B3FA0;--hero2:#361F57}
+:root[data-theme="dark"] dialog{--blue:#82AAFF;--blue-soft:#1B2947;--blue-deep:#C9D9FF;background:#182032;color:var(--ink);box-shadow:0 -10px 50px rgba(0,0,0,.6)}
+:root[data-theme="dark"] body{background:#05070C}
+:root[data-theme="dark"] .hero,:root[data-theme="dark"] .sum{background:linear-gradient(140deg,var(--hero1),var(--hero2))}
+:root[data-theme="dark"] .btn:not(.ghost):not(.danger):not(#rsFileBtn),:root[data-theme="dark"] .seg button[aria-pressed="true"],:root[data-theme="dark"] .tfs button[aria-pressed="true"],:root[data-theme="dark"] .chips button[aria-pressed="true"],:root[data-theme="dark"] .chips button[aria-pressed="true"] small,:root[data-theme="dark"] .stepper button:active,:root[data-theme="dark"] .tab[aria-selected="true"] svg{color:var(--on)}
+:root[data-theme="dark"] .chips button[aria-pressed="true"] small.tang{color:#064E36}
+:root[data-theme="dark"] .chips button[aria-pressed="true"] small.giam{color:#7A1118}
+:root[data-theme="dark"] .chips button,:root[data-theme="dark"] .addpair,:root[data-theme="dark"] .themebtn{background:var(--card)}
+:root[data-theme="dark"] .chips button[aria-pressed="true"]{background:var(--blue)}
+:root[data-theme="dark"] .chips button small{color:var(--muted)}
+:root[data-theme="dark"] .chips button[aria-pressed="false"] small.tang{color:var(--up)}
+:root[data-theme="dark"] .chips button[aria-pressed="false"] small.giam{color:var(--down)}
+:root[data-theme="dark"] input{background:#0E1522}
+:root[data-theme="dark"] input::placeholder{color:#6F7D97}
+:root[data-theme="dark"] .empty{border-color:#33405A}
+:root[data-theme="dark"] .empty.amber .icon{color:var(--blue)}
+:root[data-theme="dark"] .error,:root[data-theme="dark"] .dlg-warn{color:var(--down)}
+:root[data-theme="dark"] .up{color:var(--up)!important}
+:root[data-theme="dark"] .down{color:var(--down)!important}
+:root[data-theme="dark"] .actions button.del,:root[data-theme="dark"] .pair .del-pair{background:#3A1D22;color:#FF9A92}
+:root[data-theme="dark"] .order.sold{background:#111724;border-color:#323D52}
+:root[data-theme="dark"] .preview div+div{border-top-color:rgba(255,255,255,.1)}
+:root[data-theme="dark"] #reForm .preview:first-child span,:root[data-theme="dark"] .dlg-info span{color:var(--muted)}
+:root[data-theme="dark"] dialog h3,:root[data-theme="dark"] .dlg-info b{color:var(--ink)}
+:root[data-theme="dark"] dialog::before{background:#3A465E}
+:root[data-theme="dark"] dialog::backdrop{background:rgba(0,0,0,.65)}
+:root[data-theme="dark"] #drawer::before{display:none}
+:root[data-theme="dark"] .pair .pick-pair{background:var(--card);border-color:var(--line);color:var(--ink)}
+:root[data-theme="dark"] .pair .pick-pair[aria-current="true"]{border-color:var(--blue);background:var(--blue-soft)}
+:root[data-theme="dark"] .pair .pick-pair small{color:var(--muted)}
+:root[data-theme="dark"] #pairForm{border-top-color:var(--line)}
+:root[data-theme="dark"] .toast{background:#E8EDF7;color:#0B1220}
+:root[data-theme="dark"] .tick{background:#1E2739}
+:root[data-theme="dark"] .tick svg{stroke:#34D399}
+:root[data-theme="dark"] .chartbox{background:var(--card);border-color:var(--line)}
+:root[data-theme="dark"] .cprice,:root[data-theme="dark"] #cMsg{color:var(--muted)}
+:root[data-theme="dark"] .cprice b,:root[data-theme="dark"] .cohlc span:nth-child(1){color:var(--ink)}
+:root[data-theme="dark"] .cavg{color:#8DB2FF}
+:root[data-theme="dark"] .cohlc span:nth-child(2){color:var(--up)}
+:root[data-theme="dark"] .cohlc span:nth-child(3){color:var(--down)}
+:root[data-theme="dark"] .cohlc span:nth-child(4){color:#FBA94C}
+:root[data-theme="dark"] .cboll span:nth-child(1){color:#F0B90B}
+:root[data-theme="dark"] .cboll span:nth-child(2){color:#F47AC8}
+:root[data-theme="dark"] .cboll span:nth-child(3){color:#AB8FFA}
+:root[data-theme="dark"] #cReset{background:rgba(30,39,57,.95);border-color:#3A4A6B;color:#8DB2FF}
+:root[data-theme="dark"] #bollBtn{background:var(--card);border-color:#3A465E;color:var(--muted)}
+:root[data-theme="dark"] #bollBtn[aria-pressed="true"]{background:#0B0E14;border-color:#FCD535;color:#FCD535}
 </style>
 </head>
 <body>
@@ -415,7 +479,7 @@ x-coin{display:inline}
     <div class="track" id="track">
 
       <section class="panel" id="p0" role="tabpanel" aria-labelledby="t0">
-        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="themebtn" aria-label="Chuyển sang giao diện tối"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Tổng quan</h1>
           <p class="sub" id="today"></p></div>
@@ -436,7 +500,7 @@ x-coin{display:inline}
           <div class="tfs" id="tfs" role="group" aria-label="Khung thời gian của nến">
             <button type="button" data-tf="15m">15 phút</button><button type="button" data-tf="1h">1 giờ</button><button type="button" data-tf="4h">4 giờ</button><button type="button" data-tf="1d">Ngày</button><button type="button" data-tf="1w">Tuần</button>
           </div>
-          <p class="cinfo" id="cInfo"><span class="ctime"></span><span class="cohlc"><span></span><span></span><span></span><span></span></span></p>
+          <p class="cinfo" id="cInfo"><span class="cavg"></span><span class="cohlc"><span></span><span></span><span></span><span></span></span></p>
           <p class="cboll" id="cBoll"><span></span><span></span><span></span></p>
           <div class="cwrap"><canvas id="chart" role="img" aria-label="Biểu đồ nến giá trên Binance"></canvas><p id="cMsg">Đang tải biểu đồ…</p><button type="button" id="cReset" hidden>↺ Đặt lại</button></div>
         </div>
@@ -462,7 +526,7 @@ x-coin{display:inline}
       </section>
 
       <section class="panel" id="p1" role="tabpanel" aria-labelledby="t1">
-        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="themebtn" aria-label="Chuyển sang giao diện tối"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Mua <x-coin>LINK</x-coin></h1>
           <p class="sub">Ghi lệnh mua</p></div>
@@ -494,7 +558,7 @@ x-coin{display:inline}
       </section>
 
       <section class="panel" id="p2" role="tabpanel" aria-labelledby="t2">
-        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="themebtn" aria-label="Chuyển sang giao diện tối"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Bán <x-coin>LINK</x-coin></h1>
           <p class="sub">Ghi lệnh bán</p></div>
@@ -536,7 +600,7 @@ x-coin{display:inline}
       </section>
 
       <section class="panel" id="p3" role="tabpanel" aria-labelledby="t3">
-        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
+        <div class="pairbar"><div class="chips" role="group" aria-label="Cặp giao dịch"></div><button type="button" class="themebtn" aria-label="Chuyển sang giao diện tối"><svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5a8.5 8.5 0 1 0 10.7 10.7Z"/></svg><svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg></button><button type="button" class="addpair" aria-label="Thêm hoặc quản lý cặp" aria-haspopup="dialog">+</button></div>
         <header class="head">
           <div><h1>Lời / Lỗ</h1>
           <p class="sub">Đang giữ, đã bán</p></div>
@@ -723,6 +787,13 @@ const tabs = [...document.querySelectorAll('.tab')];
 const panels = [...document.querySelectorAll('.panel')];
 let current = -1;
 
+const isDark = () => document.documentElement.dataset.theme === 'dark';
+function paintBar(i) {
+  const color = getComputedStyle(panels[i]).getPropertyValue('--blue').trim();
+  indicator.style.setProperty('--active', color);
+  document.querySelector('meta[name="theme-color"]').content = isDark() ? '#0B101A' : color;
+}
+
 function go(i, swiped) {
   i = Math.max(0, Math.min(3, i));
   if (i === current) { panels[i].scrollTo({ top: 0, behavior: 'smooth' }); return; }
@@ -730,9 +801,7 @@ function go(i, swiped) {
   track.style.transform = `translateX(${-100 * i}%)`;
   indicator.style.transform = `translateX(${100 * i}%)`;
   // thanh đánh dấu và thanh trình duyệt đổi theo màu của tab
-  const color = getComputedStyle(panels[i]).getPropertyValue('--blue').trim();
-  indicator.style.setProperty('--active', color);
-  document.querySelector('meta[name="theme-color"]').content = color;
+  paintBar(i);
   indicator.classList.remove('move');
   void indicator.offsetWidth;
   indicator.classList.add('move');
@@ -2028,7 +2097,14 @@ function niceStep(range) {
   return [1, 2, 2.5, 5, 10].map(m => m * base).find(v => v >= raw);
 }
 
+// màu vẽ trên canvas theo giao diện sáng/tối
+const inks = {
+  light: { grid: '#EDF0F6', text: '#6B7690', up: '#0E9F6E', down: '#E02D3C', boll: ['#E09B00', '#C2358F', '#6F4BD8'], fill: 'rgba(111,75,216,.07)', avg: '#1E4FBF', avgText: '#1E4FBF', lastUp: '#0B7A3B', lastDown: '#C0261C', cross: '#56627A' },
+  dark: { grid: '#232D41', text: '#8794AD', up: '#2EBD85', down: '#F6465D', boll: ['#F0B90B', '#E94FB0', '#9B7BF5'], fill: 'rgba(155,123,245,.09)', avg: '#3B6FE0', avgText: '#8DB2FF', lastUp: '#1B8562', lastDown: '#CF3A4E', cross: '#B7C2D8' }
+};
+
 function drawChart(problem) {
+  const ink = inks[isDark() ? 'dark' : 'light'];
   const every = chart.key === chartKey() ? chart.rows : [];
   // các nến nằm trong khung đang xem
   const edge = every.length - 1 - clampOffset(chart.offset);
@@ -2039,9 +2115,11 @@ function drawChart(problem) {
   $('bollBtn').setAttribute('aria-pressed', chart.boll);
   $('cBoll').hidden = !chart.boll;
   $('cReset').hidden = !rows.length || (!chart.range && chart.offset === 0 && chart.count === SHOWN);
-  const info = (time, values = [], bad = false) => {
-    const line = $('cInfo').querySelector('.ctime');
-    line.textContent = time; line.classList.toggle('bad', bad);
+  // dòng đầu: giá trung bình của các lệnh đang giữ; dòng dưới: giá của cây nến
+  const avg = totals(openLots(replay(data).lots)).avg;
+  const mean = document.createElement('b'); mean.textContent = avg > 0 ? fmtPrice(avg) : '—';
+  $('cInfo').querySelector('.cavg').replaceChildren('Giá trung bình ', mean, avg > 0 ? ' USDT' : '');
+  const info = (values = []) => {
     $('cInfo').querySelectorAll('.cohlc span').forEach((e, i) => {
       e.textContent = '';
       if (values.length) { const b = document.createElement('b'); b.textContent = values[i]; e.append(['Mở', 'Cao', 'Thấp', 'Đóng'][i] + ' ', b); }
@@ -2062,7 +2140,7 @@ function drawChart(problem) {
   if (problem) chart.problem = problem; else if (!chart.miss) chart.problem = '';
   if (!rows.length) {
     $('cMsg').textContent = chart.problem || 'Đang tải biểu đồ…';
-    $('cLast').textContent = '—'; $('cChange').textContent = ''; info('');
+    $('cLast').textContent = '—'; $('cChange').textContent = ''; info();
     $('cBoll').querySelectorAll('span').forEach(e => e.textContent = '');
     chart.geo = null;
     return;
@@ -2072,12 +2150,12 @@ function drawChart(problem) {
   const last = every.at(-1), change = (rows.at(-1).c - rows[0].o) / rows[0].o * 100;
   $('cLast').textContent = fmtPrice(last.c);
   $('cChange').textContent = `${change > 0 ? '+' : ''}${fmt(change)}% · ${rows.length} nến`;
-  $('cChange').style.color = change >= 0 ? '#0B7A3B' : '#C0261C';
+  $('cChange').style.color = change >= 0 ? 'var(--up)' : 'var(--down)';
   let pick = chart.sel === null ? -1 : rows.findIndex(r => r.t === chart.sel);
   if (pick < 0) chart.sel = null;
   const k = rows[pick < 0 ? rows.length - 1 : pick];
-  info(chart.problem ? 'Mất kết nối, biểu đồ đang đứng yên.' : candleTime(k.t, true),
-    [k.o, k.h, k.l, k.c].map(n => fmtPrice(n)), Boolean(chart.problem));
+  info([k.o, k.h, k.l, k.c].map(n => fmtPrice(n)));
+  if (chart.problem) { $('cChange').textContent = 'Mất kết nối'; $('cChange').style.color = 'var(--down)'; }
 
   const band = bands[pick < 0 ? rows.length - 1 : pick];
   const short = n => fmtPrice(Number(n.toPrecision(6)));
@@ -2087,7 +2165,6 @@ function drawChart(problem) {
   });
 
   // khoảng giá: theo nến, nới thêm để thấy giá vốn nếu nó không quá xa
-  const avg = totals(replay(data).lots).avg;
   let low = Math.min(...rows.map(r => r.l)), high = Math.max(...rows.map(r => r.h));
   bands.forEach(b => { if (b) { low = Math.min(low, b.dn); high = Math.max(high, b.up); } });
   const span = high - low || high * .01;
@@ -2108,8 +2185,8 @@ function drawChart(problem) {
 
   g.textBaseline = 'middle'; g.lineWidth = 1;
   for (let p = Math.ceil(low / step) * step; p <= high; p += step) {
-    g.fillStyle = '#EDF0F6'; g.fillRect(0, Math.round(y(p)), plot, 1);
-    g.fillStyle = '#6B7690'; g.textAlign = 'left'; g.fillText(label(p), plot + 6, y(p));
+    g.fillStyle = ink.grid; g.fillRect(0, Math.round(y(p)), plot, 1);
+    g.fillStyle = ink.text; g.textAlign = 'left'; g.fillText(label(p), plot + 6, y(p));
   }
   // nến và BOLL không được tràn sang trục giá hay vùng khối lượng
   const clip = h => { g.save(); g.beginPath(); g.rect(0, 0, plot, h); g.clip(); };
@@ -2123,16 +2200,17 @@ function drawChart(problem) {
   if (first >= 0) { // nền mờ giữa hai dải
     g.beginPath(); trace('up');
     for (let i = bands.length - 1; i >= first; i--) g.lineTo(x(i), y(bands[i].dn));
-    g.closePath(); g.fillStyle = 'rgba(111,75,216,.07)'; g.fill();
+    g.closePath(); g.fillStyle = ink.fill; g.fill();
   }
   const most = Math.max(...rows.map(r => r.v)) || 1, body = Math.max(1.5, slot * .66);
-  const paint = r => r.c >= r.o ? '#0E9F6E' : '#E02D3C';
+  const paint = r => r.c >= r.o ? ink.up : ink.down;
   rows.forEach((r, i) => {
     g.fillStyle = paint(r);
     g.fillRect(x(i) - .5, y(r.h), 1, Math.max(1, y(r.l) - y(r.h)));
     g.fillRect(x(i) - body / 2, y(Math.max(r.o, r.c)), body, Math.max(1, Math.abs(y(r.o) - y(r.c))));
   });
-  if (first >= 0) [['up', '#E09B00'], ['mid', '#C2358F'], ['dn', '#6F4BD8']].forEach(([key, color]) => {
+  if (first >= 0) ['up', 'mid', 'dn'].forEach((key, n) => {
+    const color = ink.boll[n];
     g.beginPath(); trace(key); g.strokeStyle = color; g.lineWidth = 1.4; g.lineJoin = 'round'; g.stroke(); g.lineWidth = 1;
   });
   g.restore();
@@ -2140,7 +2218,7 @@ function drawChart(problem) {
   g.globalAlpha = .22;
   rows.forEach((r, i) => { g.fillStyle = paint(r); g.fillRect(x(i) - body / 2, bottom - r.v / most * (volume - 6), body, r.v / most * (volume - 6)); });
   g.restore();
-  g.fillStyle = '#6B7690'; g.textBaseline = 'alphabetic';
+  g.fillStyle = ink.text; g.textBaseline = 'alphabetic';
   const intraday = !['1d', '1w'].includes(chart.tf), back = intraday && chart.offset > 0;
   [0, .5, 1].forEach(f => {
     const i = Math.round(f * (rows.length - 1));
@@ -2164,13 +2242,13 @@ function drawChart(problem) {
     const outside = avg > high ? 1 : avg < low ? -1 : 0;
     let at = Math.round(outside === 1 ? top + 4 : outside === -1 ? floor : y(avg));
     if (Math.abs(at - lastY) < 19) at = lastY + (avg > last.c ? -19 : 19); // hai nhãn không đè nhau
-    line(avg, '#1E4FBF', [6, 4], at);
-    g.fillStyle = '#1E4FBF'; g.textAlign = 'left';
+    line(avg, ink.avg, [6, 4], at);
+    g.fillStyle = ink.avgText; g.textAlign = 'left';
     g.fillText('Giá vốn' + (outside === 1 ? ' ↑' : outside === -1 ? ' ↓' : ''), 4, at + (at < 20 ? 10 : -9));
   }
-  line(last.c, last.c >= last.o ? '#0B7A3B' : '#C0261C', [2, 3], lastY);
+  line(last.c, last.c >= last.o ? ink.lastUp : ink.lastDown, [2, 3], lastY);
   if (pick >= 0) {
-    g.strokeStyle = '#56627A'; g.setLineDash([3, 3]); g.beginPath();
+    g.strokeStyle = ink.cross; g.setLineDash([3, 3]); g.beginPath();
     g.moveTo(x(pick), 0); g.lineTo(x(pick), bottom);
     const at = y(k.c);
     if (at >= 0 && at <= floor + 2) { g.moveTo(0, at); g.lineTo(plot, at); }
@@ -2291,12 +2369,34 @@ window.addEventListener('storage', e => {
   else if (e.key === Store.key) { data = Store.load(); render(); }
 });
 
+// ---------- Sáng / tối ----------
+const THEME = 'linkdca.v1.theme';
+let themePicked = false; // đã tự chọn thì không đổi theo máy nữa
+try { themePicked = ['dark', 'light'].includes(localStorage.getItem(THEME)); } catch (e) {}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.querySelectorAll('.themebtn').forEach(b => b.setAttribute('aria-label', theme === 'dark' ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'));
+  if (current >= 0) paintBar(current);
+  if (chartReady) drawChart();
+}
+document.querySelectorAll('.themebtn').forEach(b => b.addEventListener('click', () => {
+  const theme = isDark() ? 'light' : 'dark';
+  themePicked = true;
+  try { localStorage.setItem(THEME, theme); } catch (e) {}
+  if (document.startViewTransition && !calm()) document.startViewTransition(() => setTheme(theme));
+  else setTheme(theme);
+}));
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', e => { if (!themePicked) setTheme(e.matches ? 'dark' : 'light'); });
+window.addEventListener('storage', e => {
+  if (e.key === THEME && e.newValue) { themePicked = true; setTheme(e.newValue); }
+});
+
 applyCoin();
 resetForm();
 render();
 fetchQuotes();
 chartReady = true;
-drawChart();
+setTheme(document.documentElement.dataset.theme);
 fetchChart();
 
 $('today').textContent =
