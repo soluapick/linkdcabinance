@@ -378,13 +378,25 @@ x-coin{display:inline}
 .tfs{display:flex;gap:4px;background:var(--blue-soft);border-radius:12px;padding:3px}
 .tfs button{flex:1 1 auto;height:38px;padding:0 2px;border:0;border-radius:9px;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--blue);white-space:nowrap;cursor:pointer;transition:background-color .25s,color .25s}
 .tfs button[aria-pressed="true"]{background:var(--blue);color:#fff}
-.cinfo{margin:8px 0 4px;min-height:36px;font-size:13px;line-height:18px;color:#56627A;font-variant-numeric:tabular-nums}
+.cinfo{margin:8px 0 4px;font-size:12.5px;line-height:18px;font-variant-numeric:tabular-nums}
+.ctime{display:block;min-height:18px;font-weight:800;color:#1E4FBF}
+.ctime.bad{color:#C0261C}
+.cohlc{display:flex;flex-wrap:wrap;justify-content:space-between;column-gap:8px;min-height:18px;font-weight:600}
+.cohlc.two{display:grid;grid-template-columns:1fr 1fr}
+.cohlc span{white-space:nowrap}
+.cohlc span:empty{display:none}
+.cohlc b{font-weight:800}
+.cohlc span:nth-child(1){color:#0E1B35}
+.cohlc span:nth-child(2){color:#0B7A3B}
+.cohlc span:nth-child(3){color:#C0261C}
+.cohlc span:nth-child(4){color:#B45309}
 .cwrap{position:relative;height:260px}
-#chart{display:block;width:100%;height:100%;touch-action:pan-y;cursor:crosshair;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#chart{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 #cMsg{position:absolute;inset:0;display:grid;place-items:center;margin:0;text-align:center;font-size:15px;color:#56627A;pointer-events:none}
 #cMsg:empty{display:none}
-.cnote{margin:8px 0 0;font-size:13px;line-height:1.5;color:#56627A}
-@media (max-width:359px){.tfs button{font-size:12px}.cinfo{min-height:54px}}
+#cReset{position:absolute;left:4px;bottom:20px;height:32px;padding:0 12px;border:1.5px solid #C5D2EE;border-radius:99px;background:rgba(255,255,255,.94);font-family:inherit;font-size:12.5px;font-weight:800;color:#1E4FBF;box-shadow:0 2px 8px rgba(14,27,53,.14);cursor:pointer}
+#cReset[hidden]{display:none}
+@media (max-width:359px){.tfs button{font-size:12px}.cohlc{min-height:36px}}
 .crow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 8px}
 .crow .cprice{margin:0;min-width:0}
 #bollBtn{flex:none;height:36px;padding:0 14px;border:1.5px solid #D5DCE8;border-radius:99px;background:#fff;font-family:inherit;font-size:13px;font-weight:800;color:#56627A;cursor:pointer;transition:background-color .25s,color .25s,border-color .25s}
@@ -424,10 +436,9 @@ x-coin{display:inline}
           <div class="tfs" id="tfs" role="group" aria-label="Khung thời gian của nến">
             <button type="button" data-tf="15m">15 phút</button><button type="button" data-tf="1h">1 giờ</button><button type="button" data-tf="4h">4 giờ</button><button type="button" data-tf="1d">Ngày</button><button type="button" data-tf="1w">Tuần</button>
           </div>
-          <p class="cinfo" id="cInfo">&nbsp;</p>
+          <p class="cinfo" id="cInfo"><span class="ctime"></span><span class="cohlc"><span></span><span></span><span></span><span></span></span></p>
           <p class="cboll" id="cBoll"><span></span><span></span><span></span></p>
-          <div class="cwrap"><canvas id="chart" role="img" aria-label="Biểu đồ nến giá trên Binance"></canvas><p id="cMsg">Đang tải biểu đồ…</p></div>
-          <p class="cnote">Nến theo giá khớp trên Binance. Vạch xanh đứt là giá vốn trung bình của bạn. BOLL (20, 2): UP là dải trên, MB là đường giữa, DN là dải dưới. Chạm hoặc rê ngang để xem từng nến.</p>
+          <div class="cwrap"><canvas id="chart" role="img" aria-label="Biểu đồ nến giá trên Binance"></canvas><p id="cMsg">Đang tải biểu đồ…</p><button type="button" id="cReset" hidden>↺ Đặt lại</button></div>
         </div>
         <h2>Lệnh gần đây</h2>
         <div class="empty" id="ovEmpty">
@@ -1921,7 +1932,13 @@ $('pairForm').addEventListener('submit', async e => {
 // ---------- Biểu đồ nến Binance ----------
 const frames = { '15m': 9e5, '1h': 36e5, '4h': 144e5, '1d': 864e5, '1w': 6048e5 };
 const chart = { tf: frames[reg.tf] ? reg.tf : '1h', boll: reg.boll, key: '', rows: [], busy: '', miss: 0, sel: null, shown: null };
-const SHOWN = 60, PERIOD = 20, KEEP = SHOWN + PERIOD - 1; // lấy dư 19 nến để đường BOLL phủ hết khung nhìn
+const SHOWN = 60, PERIOD = 20, PAGE = 200, MOST = 1200; // số nến hiện lúc đầu, chu kỳ BOLL, mỗi lần tải, tối đa giữ
+const FEWEST = 20, WIDEST = 150; // giới hạn khi chụm hai ngón
+// khung nhìn: count = số nến vừa bề ngang, offset = số nến đã kéo lùi, range = khoảng giá khi tự chỉnh (null là tự động)
+Object.assign(chart, { count: SHOWN, offset: 0, range: null, end: false, older: false, wait: 0 });
+const resetView = () => Object.assign(chart, { count: SHOWN, offset: 0, range: null, sel: null });
+const clamp = (n, low, high) => Math.min(high, Math.max(low, n));
+const clampOffset = n => clamp(n, -Math.floor(chart.count / 3), Math.max(0, chart.rows.length - chart.count));
 
 // Bollinger Bands như Binance: đường giữa là trung bình 20 giá đóng, hai dải cách 2 độ lệch chuẩn
 function bollinger(rows) {
@@ -1951,19 +1968,23 @@ async function fetchChart() {
   const full = chart.key !== key || !chart.rows.length;
   const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
   try {
-    const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${coin}USDT&interval=${chart.tf}&limit=${full ? KEEP : 2}`, { signal: abort.signal, cache: 'no-store' });
+    const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${coin}USDT&interval=${chart.tf}&limit=${full ? PAGE : 2}`, { signal: abort.signal, cache: 'no-store' });
     const body = await r.json();
     if (key !== chartKey()) return;
     if (r.status === 400) { chart.key = key; chart.rows = []; chart.miss = 1; drawChart('Binance chưa có biểu đồ cho cặp này.'); return; }
     if (!r.ok || !Array.isArray(body) || !body.length) throw new Error('chart');
     const rows = body.map(k => ({ t: +k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5] }));
     if (!rows.every(k => k.t > 0 && k.l > 0 && k.h >= k.l && k.o > 0 && k.c > 0)) throw new Error('chart');
-    if (full) { chart.key = key; chart.rows = rows; chart.sel = null; }
+    if (full) { chart.key = key; chart.rows = rows; chart.end = rows.length < PAGE; chart.wait = 0; resetView(); }
     else if (rows[0].t > chart.rows.at(-1).t + frames[chart.tf]) chart.rows = []; // mở lại sau lâu: tải lại từ đầu
     else rows.forEach(k => {
       const last = chart.rows.at(-1);
       if (k.t === last.t) chart.rows[chart.rows.length - 1] = k;
-      else if (k.t > last.t) { chart.rows.push(k); if (chart.rows.length > KEEP) chart.rows.shift(); if (chart.sel !== null) chart.sel = Math.max(0, chart.sel - 1); }
+      else if (k.t > last.t) {
+        chart.rows.push(k);
+        if (chart.offset > 0) chart.offset += 1; // đang xem nến cũ thì giữ nguyên chỗ
+        if (chart.rows.length > MOST) { chart.rows.shift(); chart.offset = clampOffset(chart.offset); }
+      }
     });
     chart.miss = 0;
     drawChart();
@@ -1977,6 +1998,30 @@ async function fetchChart() {
   }
 }
 
+// kéo về quá khứ gần hết nến đã có thì tải thêm
+async function fetchOlder() {
+  const key = chartKey();
+  if (chart.older || chart.end || chart.key !== key || !chart.rows.length || Date.now() < chart.wait) return;
+  chart.older = true;
+  const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
+  try {
+    const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${coin}USDT&interval=${chart.tf}&limit=${PAGE}&endTime=${chart.rows[0].t - 1}`, { signal: abort.signal, cache: 'no-store' });
+    const body = await r.json();
+    if (!r.ok || !Array.isArray(body)) throw new Error('chart');
+    if (key !== chartKey() || chart.key !== key) return;
+    const rows = body.map(k => ({ t: +k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5] }))
+      .filter(k => k.t > 0 && k.t < chart.rows[0].t && k.l > 0 && k.h >= k.l && k.o > 0 && k.c > 0);
+    chart.rows = rows.concat(chart.rows);
+    chart.end = !rows.length || body.length < PAGE || chart.rows.length >= MOST;
+    drawChart();
+  } catch (e) {
+    chart.wait = Date.now() + 3000;
+  } finally {
+    clearTimeout(stop);
+    chart.older = false;
+  }
+}
+
 // mức chia trục giá "tròn"
 function niceStep(range) {
   const raw = range / 4, base = 10 ** Math.floor(Math.log10(raw));
@@ -1985,10 +2030,29 @@ function niceStep(range) {
 
 function drawChart(problem) {
   const every = chart.key === chartKey() ? chart.rows : [];
-  const rows = every.slice(-SHOWN);
-  const bands = chart.boll ? bollinger(every).slice(-SHOWN) : [];
+  // các nến nằm trong khung đang xem
+  const edge = every.length - 1 - clampOffset(chart.offset);
+  const from = Math.max(0, Math.floor(edge - chart.count + 1.5)), to = Math.min(every.length - 1, Math.floor(edge + .5));
+  const rows = every.slice(from, to + 1);
+  const lead = Math.max(0, from - PERIOD + 1); // lấy dư 19 nến để đường BOLL phủ hết khung nhìn
+  const bands = chart.boll ? bollinger(every.slice(lead, to + 1)).slice(from - lead) : [];
   $('bollBtn').setAttribute('aria-pressed', chart.boll);
   $('cBoll').hidden = !chart.boll;
+  $('cReset').hidden = !rows.length || (!chart.range && chart.offset === 0 && chart.count === SHOWN);
+  const info = (time, values = [], bad = false) => {
+    const line = $('cInfo').querySelector('.ctime');
+    line.textContent = time; line.classList.toggle('bad', bad);
+    $('cInfo').querySelectorAll('.cohlc span').forEach((e, i) => {
+      e.textContent = '';
+      if (values.length) { const b = document.createElement('b'); b.textContent = values[i]; e.append(['Mở', 'Cao', 'Thấp', 'Đóng'][i] + ' ', b); }
+    });
+    // không vừa một hàng (màn hình hẹp, giá dài) thì chia đều 2 cột
+    const four = $('cInfo').querySelector('.cohlc');
+    // đã chia 2 cột thì giữ nguyên cho cặp và khung giờ đó, để biểu đồ không nhảy lên xuống khi đang kéo
+    if (four.dataset.key !== chartKey() + innerWidth) { four.classList.remove('two'); four.dataset.key = chartKey() + innerWidth; }
+    const tops = new Set([...four.children].map(e => e.offsetTop));
+    if (tops.size > 1) four.classList.add('two');
+  };
   const width = canvas.clientWidth, height = canvas.clientHeight, ratio = window.devicePixelRatio || 1;
   if (!width) return;
   canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
@@ -1998,20 +2062,24 @@ function drawChart(problem) {
   if (problem) chart.problem = problem; else if (!chart.miss) chart.problem = '';
   if (!rows.length) {
     $('cMsg').textContent = chart.problem || 'Đang tải biểu đồ…';
-    $('cLast').textContent = '—'; $('cChange').textContent = ''; $('cInfo').textContent = ' ';
+    $('cLast').textContent = '—'; $('cChange').textContent = ''; info('');
     $('cBoll').querySelectorAll('span').forEach(e => e.textContent = '');
+    chart.geo = null;
     return;
   }
   $('cMsg').textContent = '';
-  const last = rows.at(-1), change = (last.c - rows[0].o) / rows[0].o * 100;
+  chart.offset = clampOffset(chart.offset);
+  const last = every.at(-1), change = (rows.at(-1).c - rows[0].o) / rows[0].o * 100;
   $('cLast').textContent = fmtPrice(last.c);
   $('cChange').textContent = `${change > 0 ? '+' : ''}${fmt(change)}% · ${rows.length} nến`;
   $('cChange').style.color = change >= 0 ? '#0B7A3B' : '#C0261C';
-  const k = rows[chart.sel ?? rows.length - 1];
-  $('cInfo').textContent = chart.problem ? 'Mất kết nối, biểu đồ đang đứng yên.'
-    : `${candleTime(k.t, true)} · Mở ${fmtPrice(k.o)} · Cao ${fmtPrice(k.h)} · Thấp ${fmtPrice(k.l)} · Đóng ${fmtPrice(k.c)}`;
+  let pick = chart.sel === null ? -1 : rows.findIndex(r => r.t === chart.sel);
+  if (pick < 0) chart.sel = null;
+  const k = rows[pick < 0 ? rows.length - 1 : pick];
+  info(chart.problem ? 'Mất kết nối, biểu đồ đang đứng yên.' : candleTime(k.t, true),
+    [k.o, k.h, k.l, k.c].map(n => fmtPrice(n)), Boolean(chart.problem));
 
-  const band = bands[chart.sel ?? rows.length - 1];
+  const band = bands[pick < 0 ? rows.length - 1 : pick];
   const short = n => fmtPrice(Number(n.toPrecision(6)));
   $('cBoll').querySelectorAll('span').forEach((e, i) => {
     const [name, key] = [['UP', 'up'], ['MB', 'mid'], ['DN', 'dn']][i];
@@ -2026,6 +2094,8 @@ function drawChart(problem) {
   if (avg > 0 && avg > low - span * .8 && avg < high + span * .8) { low = Math.min(low, avg); high = Math.max(high, avg); }
   const pad = (high - low || high * .01) * .08;
   low -= pad; high += pad;
+  const auto = { low, high };
+  if (chart.range) ({ low, high } = chart.range);
 
   const step = niceStep(high - low), digits = Math.min(12, Math.max(0, Math.ceil(-Math.log10(step) - 1e-9) + (String(step / 10 ** Math.floor(Math.log10(step))).includes('.') ? 1 : 0)));
   const label = n => n.toLocaleString('vi-VN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
@@ -2034,40 +2104,50 @@ function drawChart(problem) {
   const axis = Math.ceil(Math.max(g.measureText(label(high)).width, g.measureText(tag(last.c)).width, avg ? g.measureText(tag(avg)).width : 0)) + 12;
   const plot = width - axis, bottom = height - 18, volume = 34, top = 6;
   const y = p => top + (high - p) / (high - low) * (bottom - volume - top);
-  const slot = plot / 60, x = i => plot - (rows.length - i - .5) * slot;
+  const slot = plot / chart.count, x = i => plot - (edge - from - i + .5) * slot; // i tính từ nến đầu khung
 
   g.textBaseline = 'middle'; g.lineWidth = 1;
   for (let p = Math.ceil(low / step) * step; p <= high; p += step) {
     g.fillStyle = '#EDF0F6'; g.fillRect(0, Math.round(y(p)), plot, 1);
     g.fillStyle = '#6B7690'; g.textAlign = 'left'; g.fillText(label(p), plot + 6, y(p));
   }
+  // nến và BOLL không được tràn sang trục giá hay vùng khối lượng
+  const clip = h => { g.save(); g.beginPath(); g.rect(0, 0, plot, h); g.clip(); };
   // vẽ một đường của BOLL, bỏ qua đoạn chưa đủ 20 nến
   const trace = (key, join) => {
     let open = join;
     bands.forEach((b, i) => { if (!b) return; g[open ? 'lineTo' : 'moveTo'](x(i), y(b[key])); open = true; });
   };
   const first = bands.findIndex(Boolean);
+  clip(bottom - volume + 2);
   if (first >= 0) { // nền mờ giữa hai dải
     g.beginPath(); trace('up');
     for (let i = bands.length - 1; i >= first; i--) g.lineTo(x(i), y(bands[i].dn));
     g.closePath(); g.fillStyle = 'rgba(111,75,216,.07)'; g.fill();
   }
   const most = Math.max(...rows.map(r => r.v)) || 1, body = Math.max(1.5, slot * .66);
+  const paint = r => r.c >= r.o ? '#0E9F6E' : '#E02D3C';
   rows.forEach((r, i) => {
-    const color = r.c >= r.o ? '#0E9F6E' : '#E02D3C';
-    g.fillStyle = color;
-    g.globalAlpha = .22; g.fillRect(x(i) - body / 2, bottom - r.v / most * (volume - 6), body, r.v / most * (volume - 6)); g.globalAlpha = 1;
+    g.fillStyle = paint(r);
     g.fillRect(x(i) - .5, y(r.h), 1, Math.max(1, y(r.l) - y(r.h)));
     g.fillRect(x(i) - body / 2, y(Math.max(r.o, r.c)), body, Math.max(1, Math.abs(y(r.o) - y(r.c))));
   });
   if (first >= 0) [['up', '#E09B00'], ['mid', '#C2358F'], ['dn', '#6F4BD8']].forEach(([key, color]) => {
     g.beginPath(); trace(key); g.strokeStyle = color; g.lineWidth = 1.4; g.lineJoin = 'round'; g.stroke(); g.lineWidth = 1;
   });
+  g.restore();
+  clip(bottom);
+  g.globalAlpha = .22;
+  rows.forEach((r, i) => { g.fillStyle = paint(r); g.fillRect(x(i) - body / 2, bottom - r.v / most * (volume - 6), body, r.v / most * (volume - 6)); });
+  g.restore();
   g.fillStyle = '#6B7690'; g.textBaseline = 'alphabetic';
+  const intraday = !['1d', '1w'].includes(chart.tf), back = intraday && chart.offset > 0;
   [0, .5, 1].forEach(f => {
     const i = Math.round(f * (rows.length - 1));
-    g.textAlign = f === 0 ? 'left' : f === 1 ? 'right' : 'center';
-    g.fillText(candleTime(rows[i].t), f === 0 ? 0 : f === 1 ? plot : x(i), height - 4);
+    const text = back && chart.tf !== '4h' ? candleTime(rows[i].t, true) : candleTime(rows[i].t);
+    const half = g.measureText(text).width / 2;
+    g.textAlign = 'center';
+    g.fillText(text, clamp(x(i), half, plot - half), height - 4);
   });
 
   // vạch ngang có nhãn giá ở trục phải; nằm ngoài khung thì ghim ở mép
@@ -2077,39 +2157,116 @@ function drawChart(problem) {
     g.fillStyle = color; g.fillRect(plot + 1, at - 9, axis - 1, 18);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(tag(price), plot + 6, at + .5);
   };
-  const lastY = Math.round(y(last.c));
-  chart.shown = { avg, last: last.c, band: bands.at(-1) };
+  const floor = bottom - volume;
+  const lastY = Math.round(clamp(y(last.c), top + 4, floor));
+  chart.shown = { avg, last: last.c, band: bands.at(-1), low, high, from, to };
   if (avg > 0) {
     const outside = avg > high ? 1 : avg < low ? -1 : 0;
-    let at = Math.round(outside === 1 ? top + 4 : outside === -1 ? bottom - volume : y(avg));
+    let at = Math.round(outside === 1 ? top + 4 : outside === -1 ? floor : y(avg));
     if (Math.abs(at - lastY) < 19) at = lastY + (avg > last.c ? -19 : 19); // hai nhãn không đè nhau
     line(avg, '#1E4FBF', [6, 4], at);
     g.fillStyle = '#1E4FBF'; g.textAlign = 'left';
     g.fillText('Giá vốn' + (outside === 1 ? ' ↑' : outside === -1 ? ' ↓' : ''), 4, at + (at < 20 ? 10 : -9));
   }
   line(last.c, last.c >= last.o ? '#0B7A3B' : '#C0261C', [2, 3], lastY);
-  if (chart.sel !== null && rows[chart.sel]) {
+  if (pick >= 0) {
     g.strokeStyle = '#56627A'; g.setLineDash([3, 3]); g.beginPath();
-    g.moveTo(x(chart.sel), 0); g.lineTo(x(chart.sel), bottom);
-    g.moveTo(0, y(k.c)); g.lineTo(plot, y(k.c)); g.stroke(); g.setLineDash([]);
+    g.moveTo(x(pick), 0); g.lineTo(x(pick), bottom);
+    const at = y(k.c);
+    if (at >= 0 && at <= floor + 2) { g.moveTo(0, at); g.lineTo(plot, at); }
+    g.stroke(); g.setLineDash([]);
   }
-  chart.geo = { plot, slot };
+  chart.geo = { plot, slot, edge, from, to, tall: floor - top, low, high, auto };
+  if (from < PERIOD + 20) fetchOlder();
 }
 
-function pickCandle(e) {
-  if (chart.key !== chartKey() || !chart.rows.length || !chart.geo) return;
-  const count = Math.min(SHOWN, chart.rows.length);
-  const px = e.clientX - canvas.getBoundingClientRect().left;
-  const i = count - 1 - Math.floor((chart.geo.plot - px) / chart.geo.slot);
-  chart.sel = Math.max(0, Math.min(count - 1, i));
+// ---- Ngón tay trên biểu đồ ----
+// kéo ngang: xem nến cũ · kéo dọc: dời giá · kéo cột giá: co giãn · chụm hai ngón: số nến · giữ yên rồi rê: xem từng nến
+let queued = 0;
+const redraw = () => { queued ||= requestAnimationFrame(() => { queued = 0; drawChart(); }); };
+const spot = e => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+const ready = () => chart.key === chartKey() && chart.rows.length && chart.geo;
+const fingers = new Map();
+let hand = null;
+
+function pickCandle(px) {
+  if (!ready()) return;
+  const { plot, slot, edge, from, to } = chart.geo;
+  const i = clamp(Math.round(edge + .5 - (plot - px) / slot), from, to);
+  chart.sel = chart.rows[i]?.t ?? null;
   drawChart();
 }
 const dropCandle = () => { if (chart.sel !== null) { chart.sel = null; drawChart(); } };
-canvas.addEventListener('pointerdown', pickCandle);
-canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) pickCandle(e); });
-canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') dropCandle(); });
-canvas.addEventListener('pointercancel', dropCandle); // ngón tay chuyển sang cuộn trang
+const letGo = () => { clearTimeout(hand?.timer); hand = null; };
+const spread = () => { const [a, b] = [...fingers.values()]; return Math.max(24, Math.hypot(a.x - b.x, a.y - b.y)); };
+
+canvas.addEventListener('pointerdown', e => {
+  if (!ready() || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const at = spot(e);
+  fingers.set(e.pointerId, at);
+  try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+  letGo();
+  if (fingers.size === 2) { chart.sel = null; hand = { mode: 'pinch', gap: spread(), count: chart.count }; drawChart(); return; }
+  if (fingers.size > 2) return;
+  hand = { mode: null, x: at.x, y: at.y, offset: chart.offset, slot: chart.geo.slot, low: chart.geo.low, high: chart.geo.high, axis: at.x > chart.geo.plot, touch: e.pointerType !== 'mouse' };
+  if (hand.touch && !hand.axis) {
+    const mine = hand;
+    mine.timer = setTimeout(() => { if (hand === mine && !mine.mode) { mine.mode = 'cross'; pickCandle(mine.x); navigator.vibrate?.(10); } }, 350);
+  }
+});
+canvas.addEventListener('pointermove', e => {
+  const at = spot(e);
+  if (!fingers.has(e.pointerId)) { // chuột rê qua (không bấm) thì xem nến
+    if (e.pointerType === 'mouse' && ready()) { if (at.x <= chart.geo.plot) pickCandle(at.x); else dropCandle(); canvas.style.cursor = at.x > chart.geo.plot ? 'ns-resize' : 'crosshair'; }
+    return;
+  }
+  fingers.set(e.pointerId, at);
+  if (!hand || !ready()) return;
+  if (hand.mode === 'pinch') {
+    if (fingers.size < 2) return;
+    chart.count = Math.round(clamp(hand.count * hand.gap / spread(), FEWEST, WIDEST));
+    chart.offset = clampOffset(chart.offset);
+    return redraw();
+  }
+  const dx = at.x - hand.x, dy = at.y - hand.y;
+  if (hand.mode === 'cross') return pickCandle(at.x);
+  if (!hand.mode) {
+    if (Math.hypot(dx, dy) < 7) return;
+    clearTimeout(hand.timer);
+    chart.sel = null;
+    // đang tự động mà kéo ngang thì chỉ đổi thời gian, khỏi lệch giá vì tay hơi xiên
+    hand.mode = hand.axis ? 'scale' : !chart.range && Math.abs(dx) >= Math.abs(dy) ? 'time' : 'free';
+    if (e.pointerType === 'mouse') canvas.style.cursor = hand.axis ? 'ns-resize' : 'grabbing';
+  }
+  const range = hand.high - hand.low, full = chart.geo.auto.high - chart.geo.auto.low;
+  if (hand.mode === 'scale') { // kéo cột giá: lên là phóng to, xuống là thu nhỏ
+    const half = clamp(range * Math.exp(dy / 140), Math.min(range, full * .2), Math.max(range, full * 8)) / 2;
+    const mid = (hand.high + hand.low) / 2;
+    chart.range = { low: mid - half, high: mid + half };
+    return redraw();
+  }
+  chart.offset = clampOffset(hand.offset + dx / hand.slot);
+  if (hand.mode === 'free') { // biểu đồ đi theo ngón tay, nhưng không cho trôi mất khỏi khung
+    const mid = (hand.high + hand.low) / 2, { low, high } = chart.geo.auto;
+    const moved = clamp(mid + dy / chart.geo.tall * range, Math.min(mid, low - range * .3), Math.max(mid, high + range * .3));
+    chart.range = { low: moved - range / 2, high: moved + range / 2 };
+  }
+  redraw();
+});
+const lift = e => {
+  if (!fingers.delete(e.pointerId)) return;
+  if (hand && !hand.mode && e.type === 'pointerup' && hand.touch && !hand.axis) pickCandle(hand.x); // chạm nhẹ
+  letGo();
+  if (e.pointerType === 'mouse') canvas.style.cursor = 'crosshair';
+};
+canvas.addEventListener('pointerup', lift);
+canvas.addEventListener('pointercancel', lift);
+canvas.addEventListener('lostpointercapture', lift);
+canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && !fingers.size) dropCandle(); });
+// Safari trên iPhone: không cho trang cuộn hay phóng to khi đang kéo biểu đồ
+['touchmove', 'gesturestart', 'gesturechange'].forEach(type => canvas.addEventListener(type, e => e.preventDefault(), { passive: false }));
 document.addEventListener('pointerdown', e => { if (e.target !== canvas) dropCandle(); });
+$('cReset').addEventListener('click', () => { resetView(); drawChart(); });
 $('bollBtn').addEventListener('click', () => {
   chart.boll = !chart.boll;
   reg = loadReg(); reg.boll = chart.boll; saveReg();
@@ -2118,7 +2275,7 @@ $('bollBtn').addEventListener('click', () => {
 $('tfs').addEventListener('click', e => {
   const b = e.target.closest('button');
   if (!b || b.dataset.tf === chart.tf) return;
-  chart.tf = b.dataset.tf; chart.sel = null; chart.miss = 0; chart.problem = '';
+  chart.tf = b.dataset.tf; resetView(); chart.miss = 0; chart.problem = '';
   reg = loadReg(); reg.tf = chart.tf; saveReg();
   drawChart();
   fetchChart();
