@@ -330,10 +330,18 @@ x-coin{display:inline}
 .pairbar{display:flex;align-items:center;gap:8px;margin:0 0 12px}
 .chips{display:flex;gap:8px;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;touch-action:pan-x pan-y pinch-zoom;scrollbar-width:none;position:relative;padding:3px 0}
 .chips::-webkit-scrollbar{display:none}
-.chips button,.addpair{flex:none;height:42px;border:1.5px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:99px;background:#fff;color:var(--blue);font-family:inherit;font-weight:700;cursor:pointer;transition:transform .15s,background-color .25s,color .25s}
-.chips button{min-width:68px;padding:0 18px;font-size:16px}
+.chips button,.addpair{flex:none;border:1.5px solid color-mix(in srgb,var(--blue) 35%,transparent);border-radius:99px;background:#fff;color:var(--blue);font-family:inherit;font-weight:700;cursor:pointer;transition:transform .15s,background-color .25s,color .25s}
+.chips button,.addpair{height:52px}
+.chips button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:80px;padding:0 13px;border-radius:18px;line-height:1.2}
+.chips button strong{font-size:15px;font-weight:800}
+.chips button small{font-size:13px;font-weight:600;color:#56627A;font-variant-numeric:tabular-nums;white-space:nowrap;transition:color .3s}
+.chips button small.tang{color:#0B7A3B}
+.chips button small.giam{color:#C0261C}
+.chips button[aria-pressed="true"] small{color:#fff}
+.chips button[aria-pressed="true"] small.tang{color:#A6F4C0}
+.chips button[aria-pressed="true"] small.giam{color:#FFC4BE}
 .chips button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 3px 10px color-mix(in srgb,var(--blue) 30%,transparent)}
-.addpair{width:42px;font-size:24px;line-height:1;border-style:dashed}
+.addpair{width:44px;border-radius:18px;font-size:24px;line-height:1;border-style:dashed}
 .chips button:active,.addpair:active{transform:scale(.92)}
 .panel.enter>.pairbar{animation:none}
 #drawer{margin:0 auto 0 max(0px,calc(50vw - 300px));width:min(330px,86%);max-width:86%;height:100%;height:100dvh;max-height:100%;border-radius:0 26px 26px 0;padding:calc(env(safe-area-inset-top) + 16px) 18px calc(env(safe-area-inset-bottom) + 24px);overflow-y:auto;overscroll-behavior:contain}
@@ -360,6 +368,33 @@ x-coin{display:inline}
 #pairForm input::placeholder{text-transform:none}
 #pairForm .with-btn{align-items:center}
 #pairForm .btn{width:100%;margin-top:8px}
+/* ---- Biểu đồ nến Binance ---- */
+.chartbox{margin-top:12px;background:#fff;border:1px solid #E1E6F0;border-radius:20px;padding:14px 12px 12px}
+.chead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.chead h3{margin:0;font-size:18px}
+#cChange{font-size:14px;font-weight:700;white-space:nowrap}
+.cprice{font-size:14px;font-weight:600;color:#56627A;margin:2px 0 8px}
+.cprice b{font-size:26px;font-weight:800;color:#0E1B35;font-variant-numeric:tabular-nums}
+.tfs{display:flex;gap:4px;background:var(--blue-soft);border-radius:12px;padding:3px}
+.tfs button{flex:1 1 auto;height:38px;padding:0 2px;border:0;border-radius:9px;background:none;font-family:inherit;font-size:14px;font-weight:700;color:var(--blue);white-space:nowrap;cursor:pointer;transition:background-color .25s,color .25s}
+.tfs button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.cinfo{margin:8px 0 4px;min-height:36px;font-size:13px;line-height:18px;color:#56627A;font-variant-numeric:tabular-nums}
+.cwrap{position:relative;height:260px}
+#chart{display:block;width:100%;height:100%;touch-action:pan-y;cursor:crosshair;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#cMsg{position:absolute;inset:0;display:grid;place-items:center;margin:0;text-align:center;font-size:15px;color:#56627A;pointer-events:none}
+#cMsg:empty{display:none}
+.cnote{margin:8px 0 0;font-size:13px;line-height:1.5;color:#56627A}
+@media (max-width:359px){.tfs button{font-size:12px}.cinfo{min-height:54px}}
+.crow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 8px}
+.crow .cprice{margin:0;min-width:0}
+#bollBtn{flex:none;height:36px;padding:0 14px;border:1.5px solid #D5DCE8;border-radius:99px;background:#fff;font-family:inherit;font-size:13px;font-weight:800;color:#56627A;cursor:pointer;transition:background-color .25s,color .25s,border-color .25s}
+#bollBtn[aria-pressed="true"]{background:#171B22;border-color:#171B22;color:#FCD535}
+.cboll{display:flex;flex-wrap:wrap;column-gap:12px;margin:0 0 4px;min-height:18px;font-size:12.5px;font-weight:700;line-height:18px;font-variant-numeric:tabular-nums}
+.cboll[hidden]{display:none}
+.cboll span:nth-child(1){color:#9A6A00}
+.cboll span:nth-child(2){color:#C2358F}
+.cboll span:nth-child(3){color:#6F4BD8}
+@media (max-width:359px){.cboll{min-height:36px}}
 </style>
 </head>
 <body>
@@ -382,6 +417,17 @@ x-coin{display:inline}
         <div class="grid">
           <div class="card"><div class="label"><x-coin>LINK</x-coin> đang giữ</div><div class="value" id="ovQty">0</div></div>
           <div class="card accent"><div class="label">Giá trung bình</div><div class="value" id="ovAvg">—</div></div>
+        </div>
+        <div class="chartbox">
+          <div class="chead"><h3>Biểu đồ <x-coin>LINK</x-coin></h3><span id="cChange"></span></div>
+          <div class="crow"><div class="cprice"><b id="cLast">—</b> USDT</div><button type="button" id="bollBtn" aria-pressed="true" aria-label="Bật tắt đường Bollinger Bands">BOLL</button></div>
+          <div class="tfs" id="tfs" role="group" aria-label="Khung thời gian của nến">
+            <button type="button" data-tf="15m">15 phút</button><button type="button" data-tf="1h">1 giờ</button><button type="button" data-tf="4h">4 giờ</button><button type="button" data-tf="1d">Ngày</button><button type="button" data-tf="1w">Tuần</button>
+          </div>
+          <p class="cinfo" id="cInfo">&nbsp;</p>
+          <p class="cboll" id="cBoll"><span></span><span></span><span></span></p>
+          <div class="cwrap"><canvas id="chart" role="img" aria-label="Biểu đồ nến giá trên Binance"></canvas><p id="cMsg">Đang tải biểu đồ…</p></div>
+          <p class="cnote">Nến theo giá khớp trên Binance. Vạch xanh đứt là giá vốn trung bình của bạn. BOLL (20, 2): UP là dải trên, MB là đường giữa, DN là dải dưới. Chạm hoặc rê ngang để xem từng nến.</p>
         </div>
         <h2>Lệnh gần đây</h2>
         <div class="empty" id="ovEmpty">
@@ -617,7 +663,7 @@ function loadReg() {
     if (p && coinOk(p.coin) && !list.some(x => x.coin === p.coin)) list.push({ coin: p.coin, step: stepOk(p.step) ? p.step : null });
   });
   if (!list.some(p => p.coin === 'LINK')) list.unshift({ coin: 'LINK', step: 0.3 });
-  return { list, active: list.some(p => p.coin === r?.active) ? r.active : 'LINK', lastBackup: r?.lastBackup };
+  return { list, active: list.some(p => p.coin === r?.active) ? r.active : 'LINK', lastBackup: r?.lastBackup, tf: r?.tf, boll: r?.boll !== false };
 }
 function saveReg() {
   const text = JSON.stringify(reg);
@@ -686,6 +732,7 @@ function go(i, swiped) {
   go.timer = setTimeout(() => panels[i].classList.remove('enter'), 900);
 data = Store.load(); data.lastTab = i; Store.save(data);
   runNumbers(panels[i]);
+  if (i === 0 && chartReady) fetchChart();
   fetchPrice();
   try { history.replaceState(null, '', '#' + slugs[i]); } catch (e) {}
 }
@@ -710,7 +757,7 @@ function settle() {
 track.addEventListener('touchstart', e => {
   if (drag && drag.axis === 'x') settle();
   const p = e.touches[0];
-  drag = e.touches.length === 1 && !e.target.closest('input, .pairbar') ? { x: p.clientX, y: p.clientY, dx: 0, axis: null, at: e.timeStamp } : null;
+  drag = e.touches.length === 1 && !e.target.closest('input, .pairbar, .cwrap') ? { x: p.clientX, y: p.clientY, dx: 0, axis: null, at: e.timeStamp } : null;
 }, { passive: true });
 track.addEventListener('touchmove', e => {
   if (!drag || e.touches.length !== 1) return;
@@ -909,6 +956,7 @@ function card(lot, withActions) {
   return c;
 }
 
+let chartReady = false;
 function render() {
   const state = replay(data);
   const t = totals(openLots(state.lots));
@@ -931,6 +979,7 @@ function render() {
   const saved = reg.lastBackup || Store.load('LINK').lastBackup;
   $('bkLast').textContent = saved ? 'Sao lưu gần nhất: ' + showTime(saved) : 'Bạn chưa sao lưu lần nào.';
   preview();
+  if (chartReady) drawChart();
 }
 
 function preview() {
@@ -1498,6 +1547,7 @@ function showTicker() {
     }
   });
   if (livePrice) tickerPrice = livePrice;
+  paintChips();
 }
 async function fetchPrice() {
   if (fetching) return;
@@ -1526,8 +1576,9 @@ async function fetchPrice() {
   }
 }
 setInterval(() => { if (!document.hidden) fetchPrice(); }, 2000);
+setInterval(() => { if (!document.hidden) fetchQuotes(); }, 3000);
 // mở lại app thì lấy giá ngay
-document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchPrice(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { fetchPrice(); fetchQuotes(); } });
 
 // ---------- Sao lưu & khôi phục ----------
 function backupText() {
@@ -1619,16 +1670,88 @@ const autoStep = price => Number((price * .03).toPrecision(1));
 function drawChips() {
   document.querySelectorAll('.chips').forEach(row => {
     row.replaceChildren(...reg.list.map(p => {
-      const b = el('button', '', p.coin);
+      const b = el('button');
+      b.append(el('strong', '', p.coin), el('small', '', '—'));
       b.type = 'button';
       b.dataset.coin = p.coin;
       b.setAttribute('aria-pressed', p.coin === coin);
       b.onclick = () => { if (p.coin !== coin) openPair(p.coin); };
       return b;
     }));
-    const on = row.querySelector('[aria-pressed="true"]');
-    if (on) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+    delete row.dataset.fit;
+    centerChip(row);
   });
+  paintChips();
+}
+function centerChip(row) {
+  const on = row.querySelector('[aria-pressed="true"]');
+  if (on) row.scrollLeft = on.offsetLeft - (row.clientWidth - on.offsetWidth) / 2;
+}
+
+// ---------- Giá trên các nút cặp ----------
+const quotes = {};          // giá gần nhất của từng coin
+const noQuote = new Set();  // cặp Binance không có (tạo lúc mất mạng)
+let quoting = false, quoteMisses = 0;
+// nút nhỏ nên giá từ 10.000 trở lên bỏ phần lẻ
+const chipPrice = n => n >= 10000 ? fmt(n, 0) : n >= 1 ? fmt(n, 4) : n.toLocaleString('vi-VN', { maximumSignificantDigits: 4 });
+
+function paintChips() {
+  // cặp đang mở dùng đúng giá của nhãn góc phải để hai nơi luôn khớp
+  if (livePrice) quotes[coin] = livePrice;
+  else if (priceFailed) delete quotes[coin];
+  document.querySelectorAll('.chips').forEach(row => {
+    let changed = false, all = true;
+    row.querySelectorAll('button').forEach(b => {
+      const price = quotes[b.dataset.coin], tag = b.querySelector('small');
+      const text = price ? chipPrice(price) : '—';
+      if (!price && !noQuote.has(b.dataset.coin)) all = false;
+      if (tag.textContent === text) return;
+      changed = true;
+      const before = Number(tag.dataset.price);
+      tag.textContent = text;
+      tag.dataset.price = price || '';
+      tag.className = price && before ? (price > before ? 'tang' : 'giam') : '';
+      clearTimeout(tag._calm);
+      tag._calm = setTimeout(() => tag.className = '', 1200);
+    });
+    // nút rộng ra khi giá về: canh lại cặp đang mở cho đến khi đủ giá, sau đó để người dùng tự cuộn
+    if (changed && !row.dataset.fit) { centerChip(row); if (all) row.dataset.fit = 1; }
+  });
+}
+
+async function askQuotes(query) {
+  const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 4000);
+  try {
+    const r = await fetch('https://data-api.binance.vision/api/v3/ticker/bookTicker?' + query, { signal: abort.signal, cache: 'no-store' });
+    return { status: r.status, body: r.ok ? await r.json() : null };
+  } finally { clearTimeout(stop); }
+}
+const keep = (c, bid) => { const price = Number(bid); if (price > 0) quotes[c] = price; else delete quotes[c]; };
+
+async function fetchQuotes() {
+  const others = reg.list.map(p => p.coin).filter(c => c !== coin && !noQuote.has(c));
+  if (quoting || !others.length) return;
+  quoting = true;
+  try {
+    // hỏi gộp một lần cho mọi cặp còn lại
+    const all = await askQuotes('symbols=' + encodeURIComponent(JSON.stringify(others.map(c => c + 'USDT'))));
+    if (all.body) all.body.forEach(x => keep(x.symbol.slice(0, -4), x.bidPrice));
+    else if (all.status === 400) {
+      // có một cặp sai thì Binance từ chối cả nhóm: hỏi từng cặp để loại cặp đó
+      await Promise.all(others.map(async c => {
+        const one = await askQuotes('symbol=' + c + 'USDT');
+        if (one.body) keep(c, one.body.bidPrice);
+        else if (one.status === 400) { noQuote.add(c); delete quotes[c]; }
+      }));
+    } else throw new Error('price');
+    quoteMisses = 0;
+  } catch (e) {
+    // mất mạng lâu thì bỏ giá cũ, tránh hiểu nhầm là giá mới
+    if (++quoteMisses >= 3) others.forEach(c => delete quotes[c]);
+  } finally {
+    quoting = false;
+    paintChips();
+  }
 }
 
 function applyCoin() {
@@ -1645,6 +1768,8 @@ function applyCoin() {
 
 // mở một cặp: xoá mọi thứ đang nhập dở của cặp trước rồi vẽ lại từ đầu
 function openPair(c) {
+  chart.sel = null; chart.miss = 0; chart.problem = '';
+  noQuote.delete(c);
   if (c !== coin) {
     coin = c;
     reg = loadReg(); reg.active = c; saveReg();
@@ -1668,6 +1793,8 @@ function openPair(c) {
   panels.forEach(p => p.scrollTop = 0);
   showTicker();
   fetchPrice();
+  fetchQuotes();
+  fetchChart();
 }
 
 const drawer = $('drawer');
@@ -1791,6 +1918,216 @@ $('pairForm').addEventListener('submit', async e => {
   }
 });
 
+// ---------- Biểu đồ nến Binance ----------
+const frames = { '15m': 9e5, '1h': 36e5, '4h': 144e5, '1d': 864e5, '1w': 6048e5 };
+const chart = { tf: frames[reg.tf] ? reg.tf : '1h', boll: reg.boll, key: '', rows: [], busy: '', miss: 0, sel: null, shown: null };
+const SHOWN = 60, PERIOD = 20, KEEP = SHOWN + PERIOD - 1; // lấy dư 19 nến để đường BOLL phủ hết khung nhìn
+
+// Bollinger Bands như Binance: đường giữa là trung bình 20 giá đóng, hai dải cách 2 độ lệch chuẩn
+function bollinger(rows) {
+  return rows.map((_, i) => {
+    if (i < PERIOD - 1) return null;
+    const closes = rows.slice(i - PERIOD + 1, i + 1).map(r => r.c);
+    const mid = closes.reduce((a, b) => a + b, 0) / PERIOD;
+    const dev = Math.sqrt(closes.reduce((a, c) => a + (c - mid) ** 2, 0) / PERIOD);
+    return { up: mid + 2 * dev, mid, dn: mid - 2 * dev };
+  });
+}
+const chartKey = () => coin + ' ' + chart.tf;
+const canvas = $('chart');
+const two = n => String(n).padStart(2, '0');
+const candleTime = (t, long) => {
+  const d = new Date(t), day = `${two(d.getDate())}/${two(d.getMonth() + 1)}`, hour = `${two(d.getHours())}:${two(d.getMinutes())}`;
+  if (chart.tf === '1d' || chart.tf === '1w') return long ? `${day}/${d.getFullYear()}` : day;
+  return long ? `${hour} ${day}` : chart.tf === '4h' ? day : hour;
+};
+
+async function fetchChart() {
+  if (current !== 0 || document.hidden) return;
+  const key = chartKey();
+  if (chart.busy === key) return;
+  chart.busy = key;
+  // lần đầu lấy đủ 60 nến, sau đó chỉ lấy 2 nến cuối để cập nhật
+  const full = chart.key !== key || !chart.rows.length;
+  const abort = new AbortController(), stop = setTimeout(() => abort.abort(), 6000);
+  try {
+    const r = await fetch(`https://data-api.binance.vision/api/v3/klines?symbol=${coin}USDT&interval=${chart.tf}&limit=${full ? KEEP : 2}`, { signal: abort.signal, cache: 'no-store' });
+    const body = await r.json();
+    if (key !== chartKey()) return;
+    if (r.status === 400) { chart.key = key; chart.rows = []; chart.miss = 1; drawChart('Binance chưa có biểu đồ cho cặp này.'); return; }
+    if (!r.ok || !Array.isArray(body) || !body.length) throw new Error('chart');
+    const rows = body.map(k => ({ t: +k[0], o: +k[1], h: +k[2], l: +k[3], c: +k[4], v: +k[5] }));
+    if (!rows.every(k => k.t > 0 && k.l > 0 && k.h >= k.l && k.o > 0 && k.c > 0)) throw new Error('chart');
+    if (full) { chart.key = key; chart.rows = rows; chart.sel = null; }
+    else if (rows[0].t > chart.rows.at(-1).t + frames[chart.tf]) chart.rows = []; // mở lại sau lâu: tải lại từ đầu
+    else rows.forEach(k => {
+      const last = chart.rows.at(-1);
+      if (k.t === last.t) chart.rows[chart.rows.length - 1] = k;
+      else if (k.t > last.t) { chart.rows.push(k); if (chart.rows.length > KEEP) chart.rows.shift(); if (chart.sel !== null) chart.sel = Math.max(0, chart.sel - 1); }
+    });
+    chart.miss = 0;
+    drawChart();
+    if (!chart.rows.length) setTimeout(fetchChart, 0);
+  } catch (e) {
+    if (key !== chartKey()) return;
+    if (++chart.miss >= 3 || chart.key !== key) drawChart('Không tải được biểu đồ. Kiểm tra kết nối mạng.');
+  } finally {
+    clearTimeout(stop);
+    if (chart.busy === key) chart.busy = '';
+  }
+}
+
+// mức chia trục giá "tròn"
+function niceStep(range) {
+  const raw = range / 4, base = 10 ** Math.floor(Math.log10(raw));
+  return [1, 2, 2.5, 5, 10].map(m => m * base).find(v => v >= raw);
+}
+
+function drawChart(problem) {
+  const every = chart.key === chartKey() ? chart.rows : [];
+  const rows = every.slice(-SHOWN);
+  const bands = chart.boll ? bollinger(every).slice(-SHOWN) : [];
+  $('bollBtn').setAttribute('aria-pressed', chart.boll);
+  $('cBoll').hidden = !chart.boll;
+  const width = canvas.clientWidth, height = canvas.clientHeight, ratio = window.devicePixelRatio || 1;
+  if (!width) return;
+  canvas.width = Math.round(width * ratio); canvas.height = Math.round(height * ratio);
+  const g = canvas.getContext('2d');
+  g.setTransform(ratio, 0, 0, ratio, 0, 0);
+  $('tfs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.tf === chart.tf));
+  if (problem) chart.problem = problem; else if (!chart.miss) chart.problem = '';
+  if (!rows.length) {
+    $('cMsg').textContent = chart.problem || 'Đang tải biểu đồ…';
+    $('cLast').textContent = '—'; $('cChange').textContent = ''; $('cInfo').textContent = ' ';
+    $('cBoll').querySelectorAll('span').forEach(e => e.textContent = '');
+    return;
+  }
+  $('cMsg').textContent = '';
+  const last = rows.at(-1), change = (last.c - rows[0].o) / rows[0].o * 100;
+  $('cLast').textContent = fmtPrice(last.c);
+  $('cChange').textContent = `${change > 0 ? '+' : ''}${fmt(change)}% · ${rows.length} nến`;
+  $('cChange').style.color = change >= 0 ? '#0B7A3B' : '#C0261C';
+  const k = rows[chart.sel ?? rows.length - 1];
+  $('cInfo').textContent = chart.problem ? 'Mất kết nối, biểu đồ đang đứng yên.'
+    : `${candleTime(k.t, true)} · Mở ${fmtPrice(k.o)} · Cao ${fmtPrice(k.h)} · Thấp ${fmtPrice(k.l)} · Đóng ${fmtPrice(k.c)}`;
+
+  const band = bands[chart.sel ?? rows.length - 1];
+  const short = n => fmtPrice(Number(n.toPrecision(6)));
+  $('cBoll').querySelectorAll('span').forEach((e, i) => {
+    const [name, key] = [['UP', 'up'], ['MB', 'mid'], ['DN', 'dn']][i];
+    e.textContent = band ? `${name} ${short(band[key])}` : i ? '' : 'BOLL cần đủ 20 nến';
+  });
+
+  // khoảng giá: theo nến, nới thêm để thấy giá vốn nếu nó không quá xa
+  const avg = totals(replay(data).lots).avg;
+  let low = Math.min(...rows.map(r => r.l)), high = Math.max(...rows.map(r => r.h));
+  bands.forEach(b => { if (b) { low = Math.min(low, b.dn); high = Math.max(high, b.up); } });
+  const span = high - low || high * .01;
+  if (avg > 0 && avg > low - span * .8 && avg < high + span * .8) { low = Math.min(low, avg); high = Math.max(high, avg); }
+  const pad = (high - low || high * .01) * .08;
+  low -= pad; high += pad;
+
+  const step = niceStep(high - low), digits = Math.min(12, Math.max(0, Math.ceil(-Math.log10(step) - 1e-9) + (String(step / 10 ** Math.floor(Math.log10(step))).includes('.') ? 1 : 0)));
+  const label = n => n.toLocaleString('vi-VN', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  const tag = n => label(n).length > 9 || coin !== 'LINK' ? fmtPrice(Number(n.toPrecision(6))) : fmt(n, 3);
+  g.font = '600 11px "Be Vietnam Pro", system-ui, sans-serif';
+  const axis = Math.ceil(Math.max(g.measureText(label(high)).width, g.measureText(tag(last.c)).width, avg ? g.measureText(tag(avg)).width : 0)) + 12;
+  const plot = width - axis, bottom = height - 18, volume = 34, top = 6;
+  const y = p => top + (high - p) / (high - low) * (bottom - volume - top);
+  const slot = plot / 60, x = i => plot - (rows.length - i - .5) * slot;
+
+  g.textBaseline = 'middle'; g.lineWidth = 1;
+  for (let p = Math.ceil(low / step) * step; p <= high; p += step) {
+    g.fillStyle = '#EDF0F6'; g.fillRect(0, Math.round(y(p)), plot, 1);
+    g.fillStyle = '#6B7690'; g.textAlign = 'left'; g.fillText(label(p), plot + 6, y(p));
+  }
+  // vẽ một đường của BOLL, bỏ qua đoạn chưa đủ 20 nến
+  const trace = (key, join) => {
+    let open = join;
+    bands.forEach((b, i) => { if (!b) return; g[open ? 'lineTo' : 'moveTo'](x(i), y(b[key])); open = true; });
+  };
+  const first = bands.findIndex(Boolean);
+  if (first >= 0) { // nền mờ giữa hai dải
+    g.beginPath(); trace('up');
+    for (let i = bands.length - 1; i >= first; i--) g.lineTo(x(i), y(bands[i].dn));
+    g.closePath(); g.fillStyle = 'rgba(111,75,216,.07)'; g.fill();
+  }
+  const most = Math.max(...rows.map(r => r.v)) || 1, body = Math.max(1.5, slot * .66);
+  rows.forEach((r, i) => {
+    const color = r.c >= r.o ? '#0E9F6E' : '#E02D3C';
+    g.fillStyle = color;
+    g.globalAlpha = .22; g.fillRect(x(i) - body / 2, bottom - r.v / most * (volume - 6), body, r.v / most * (volume - 6)); g.globalAlpha = 1;
+    g.fillRect(x(i) - .5, y(r.h), 1, Math.max(1, y(r.l) - y(r.h)));
+    g.fillRect(x(i) - body / 2, y(Math.max(r.o, r.c)), body, Math.max(1, Math.abs(y(r.o) - y(r.c))));
+  });
+  if (first >= 0) [['up', '#E09B00'], ['mid', '#C2358F'], ['dn', '#6F4BD8']].forEach(([key, color]) => {
+    g.beginPath(); trace(key); g.strokeStyle = color; g.lineWidth = 1.4; g.lineJoin = 'round'; g.stroke(); g.lineWidth = 1;
+  });
+  g.fillStyle = '#6B7690'; g.textBaseline = 'alphabetic';
+  [0, .5, 1].forEach(f => {
+    const i = Math.round(f * (rows.length - 1));
+    g.textAlign = f === 0 ? 'left' : f === 1 ? 'right' : 'center';
+    g.fillText(candleTime(rows[i].t), f === 0 ? 0 : f === 1 ? plot : x(i), height - 4);
+  });
+
+  // vạch ngang có nhãn giá ở trục phải; nằm ngoài khung thì ghim ở mép
+  g.textBaseline = 'middle';
+  const line = (price, color, dash, at) => {
+    g.strokeStyle = color; g.setLineDash(dash); g.beginPath(); g.moveTo(0, at + .5); g.lineTo(plot, at + .5); g.stroke(); g.setLineDash([]);
+    g.fillStyle = color; g.fillRect(plot + 1, at - 9, axis - 1, 18);
+    g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(tag(price), plot + 6, at + .5);
+  };
+  const lastY = Math.round(y(last.c));
+  chart.shown = { avg, last: last.c, band: bands.at(-1) };
+  if (avg > 0) {
+    const outside = avg > high ? 1 : avg < low ? -1 : 0;
+    let at = Math.round(outside === 1 ? top + 4 : outside === -1 ? bottom - volume : y(avg));
+    if (Math.abs(at - lastY) < 19) at = lastY + (avg > last.c ? -19 : 19); // hai nhãn không đè nhau
+    line(avg, '#1E4FBF', [6, 4], at);
+    g.fillStyle = '#1E4FBF'; g.textAlign = 'left';
+    g.fillText('Giá vốn' + (outside === 1 ? ' ↑' : outside === -1 ? ' ↓' : ''), 4, at + (at < 20 ? 10 : -9));
+  }
+  line(last.c, last.c >= last.o ? '#0B7A3B' : '#C0261C', [2, 3], lastY);
+  if (chart.sel !== null && rows[chart.sel]) {
+    g.strokeStyle = '#56627A'; g.setLineDash([3, 3]); g.beginPath();
+    g.moveTo(x(chart.sel), 0); g.lineTo(x(chart.sel), bottom);
+    g.moveTo(0, y(k.c)); g.lineTo(plot, y(k.c)); g.stroke(); g.setLineDash([]);
+  }
+  chart.geo = { plot, slot };
+}
+
+function pickCandle(e) {
+  if (chart.key !== chartKey() || !chart.rows.length || !chart.geo) return;
+  const count = Math.min(SHOWN, chart.rows.length);
+  const px = e.clientX - canvas.getBoundingClientRect().left;
+  const i = count - 1 - Math.floor((chart.geo.plot - px) / chart.geo.slot);
+  chart.sel = Math.max(0, Math.min(count - 1, i));
+  drawChart();
+}
+const dropCandle = () => { if (chart.sel !== null) { chart.sel = null; drawChart(); } };
+canvas.addEventListener('pointerdown', pickCandle);
+canvas.addEventListener('pointermove', e => { if (e.pointerType === 'mouse' || e.buttons) pickCandle(e); });
+canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') dropCandle(); });
+canvas.addEventListener('pointercancel', dropCandle); // ngón tay chuyển sang cuộn trang
+document.addEventListener('pointerdown', e => { if (e.target !== canvas) dropCandle(); });
+$('bollBtn').addEventListener('click', () => {
+  chart.boll = !chart.boll;
+  reg = loadReg(); reg.boll = chart.boll; saveReg();
+  drawChart();
+});
+$('tfs').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b || b.dataset.tf === chart.tf) return;
+  chart.tf = b.dataset.tf; chart.sel = null; chart.miss = 0; chart.problem = '';
+  reg = loadReg(); reg.tf = chart.tf; saveReg();
+  drawChart();
+  fetchChart();
+});
+window.addEventListener('resize', () => drawChart());
+document.fonts?.ready.then(() => drawChart());
+setInterval(fetchChart, 3000);
+document.addEventListener('visibilitychange', fetchChart);
+
 // mở app ở hai cửa sổ thì dữ liệu vẫn khớp
 window.addEventListener('storage', e => {
   if (e.key === REG) { reg = loadReg(); if (!reg.list.some(p => p.coin === coin)) openPair('LINK'); else drawChips(); }
@@ -1800,6 +2137,10 @@ window.addEventListener('storage', e => {
 applyCoin();
 resetForm();
 render();
+fetchQuotes();
+chartReady = true;
+drawChart();
+fetchChart();
 
 $('today').textContent =
   new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
